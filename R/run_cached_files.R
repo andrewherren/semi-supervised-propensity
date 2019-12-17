@@ -4,7 +4,7 @@
 
 ##########################################################
 # Set up working environment
-project_dir <- "~/Github/RTG-2019-2H"
+project_dir <- "~/Github/semi-supervised-propensity"
 setwd(project_dir)
 source("R/setup.R", local=FALSE, echo=TRUE)
 source("R/simulation.R", local=FALSE, echo=TRUE)
@@ -12,7 +12,7 @@ source("R/estimator.R", local=FALSE, echo=TRUE)
 source("R/reporting.R", local=FALSE, echo=TRUE)
 source("R/result_export.R", local=FALSE, echo=TRUE)
 # source("R/propensity_score.R", local=FALSE, echo=TRUE)
-project_dir <- "~/Github/RTG-2019-2H"
+project_dir <- "~/Github/semi-supervised-propensity"
 setwd(project_dir)
 output_file = file(paste0("outputs/R_log_", format(Sys.time(), 
                    "%Y%m%d%H%M"), ".txt"), "w")
@@ -174,8 +174,16 @@ save_simulation_output(mean_simulations, "summary_table_")
 #  - Linear Outcome
 #  - Homogeneous Treatment Effect
 xtable_df <- prepare_per_estimator_table(mean_simulations, "IPW")
-xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR")
-save_per_estimator_to_latex(xtable_output, "IPW")
+# For presentation - with highlights
+xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "IPW", 
+                            highlight = TRUE)
+# For paper - no highlights
+xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "IPW", 
+                            highlight = FALSE)
 
 ### Second output table
 #  - Semi-supervised
@@ -184,8 +192,16 @@ save_per_estimator_to_latex(xtable_output, "IPW")
 #  - Linear Outcome
 #  - Homogeneous Treatment Effect
 xtable_df <- prepare_per_estimator_table(mean_simulations, "IPW_BART")
-xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR")
-save_per_estimator_to_latex(xtable_output, "IPW_BART")
+# For presentation - with highlights
+xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "IPW_BART", 
+                            highlight = TRUE)
+# For paper - no highlights
+xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "IPW_BART", 
+                            highlight = FALSE)
 
 ### Third output table
 #  - Semi-supervised
@@ -194,8 +210,16 @@ save_per_estimator_to_latex(xtable_output, "IPW_BART")
 #  - Linear Outcome
 #  - Homogeneous Treatment Effect
 xtable_df <- prepare_per_estimator_table(mean_simulations, "TMLE")
-xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR")
-save_per_estimator_to_latex(xtable_output, "TMLE")
+# For presentation - with highlights
+xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "TMLE", 
+                            highlight = TRUE)
+# For paper - no highlights
+xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "TMLE", 
+                            highlight = FALSE)
 
 ### Fourth output table
 #  - Semi-supervised
@@ -204,8 +228,16 @@ save_per_estimator_to_latex(xtable_output, "TMLE")
 #  - Linear Outcome
 #  - Homogeneous Treatment Effect
 xtable_df <- prepare_per_estimator_table(mean_simulations, "BCF")
-xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR")
-save_per_estimator_to_latex(xtable_output, "BCF")
+# For presentation - with highlights
+xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "BCF", 
+                            highlight = TRUE)
+# For paper - no highlights
+xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "BCF", 
+                            highlight = FALSE)
 
 ### Fifth output table
 #  - Complete case
@@ -214,8 +246,16 @@ save_per_estimator_to_latex(xtable_output, "BCF")
 #  - Linear Outcome
 #  - Homogeneous Treatment Effect
 xtable_df <- prepare_all_estimator_table(mean_simulations, "Complete Case")
-xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR")
-save_all_estimator_to_latex(xtable_output, "CC")
+# For presentation - with highlights
+xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = TRUE)
+save_all_estimator_to_latex(xtable_output, "CC", 
+                            highlight = TRUE)
+# For paper - no highlights
+xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = FALSE)
+save_all_estimator_to_latex(xtable_output, "CC", 
+                            highlight = FALSE)
 
 ### Sixth output table
 #  - Semi-supervised
@@ -224,5 +264,13 @@ save_all_estimator_to_latex(xtable_output, "CC")
 #  - Linear Outcome
 #  - Homogeneous Treatment Effect
 xtable_df <- prepare_all_estimator_table(mean_simulations, "Semi-supervised")
-xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR")
-save_all_estimator_to_latex(xtable_output, "SSL")
+# For presentation - with highlights
+xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = TRUE)
+save_all_estimator_to_latex(xtable_output, "SSL", 
+                            highlight = TRUE)
+# For paper - no highlights
+xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR", 
+                                             highlight = FALSE)
+save_all_estimator_to_latex(xtable_output, "SSL", 
+                            highlight = FALSE)

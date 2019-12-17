@@ -35,7 +35,7 @@ summarize_simulation_results <- function(simulation_results_df){
     "Estimator", "Method", "Outcome Model", "Treatment Effect Type", 
     "Unlabeled Mechanism", "% Unlabeled", "Confounding", 
     "Other_Notes", "N", "Tau", "ATE", "ATE_CI_lb", 
-    "ATE_CI_lb", "RMSE", "Coverage", "Bias"
+    "ATE_CI_ub", "RMSE", "Coverage", "Bias"
   )
   return(mean_simulations)
 }
@@ -118,11 +118,18 @@ prepare_per_estimator_table <- function(sim_table_df, estimator){
 # xtable_df <- prepare_per_estimator_table(mean_simulations, "TMLE")
 # xtable_df <- prepare_per_estimator_table(mean_simulations, "BCF")
 
-format_per_estimator_xtable <- function(xtable_df, n_sim, missing_type){
+format_per_estimator_xtable <- function(xtable_df, n_sim, 
+                                        missing_type, highlight = TRUE){
+  if (highlight) {
+    alignment <- c("l", "l", "l", "l", "c", "c", 
+                   ">{\\columncolor[gray]{.9}}c", ">{\\columncolor[gray]{.9}}c")
+  } else {
+    alignment <- c("l", "l", "l", "l", "c", "c", "c", "c")
+  }
+  
   output <- xtable(
     xtable_df, type = "latex", 
-    align = c("l", "l", "l", "l", "c", "c", 
-              ">{\\columncolor[gray]{.9}}c", ">{\\columncolor[gray]{.9}}c"), 
+    align = alignment, 
     caption = paste0(n_sim, " simulations with outcomes ", missing_type)
   )
   return(output)
@@ -131,18 +138,29 @@ format_per_estimator_xtable <- function(xtable_df, n_sim, missing_type){
 # # Format simulation result table as xtable output
 # xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR")
 
-save_per_estimator_to_latex <- function(xtable_output, estimator){
-  file_name = paste0("outputs/simulations_", estimator, 
-                     "_LIN_HOM_MCAR_90.tex")
-  print(xtable_output,
-        floating = TRUE, latex.environments = "center",
-        include.rownames = FALSE, size="small", 
-        add.to.row=list(list(3,4,5,6),c("\\rowcolor[gray]{.8} ", 
-                                        "\\rowcolor[gray]{.7} ", 
-                                        "\\rowcolor[gray]{.6} ", 
-                                        "\\rowcolor[gray]{.5} ")), 
-        file = file_name
-  )
+save_per_estimator_to_latex <- function(xtable_output, estimator, 
+                                        highlight = TRUE){
+  if (highlight){
+    file_name = paste0("outputs/simulations_", estimator, 
+                       "_LIN_HOM_MCAR_90_HIGHLIGHT.tex")
+    print(xtable_output,
+          floating = TRUE, latex.environments = "center",
+          include.rownames = FALSE, size="small", 
+          add.to.row=list(list(3,4,5,6),c("\\rowcolor[gray]{.8} ", 
+                                          "\\rowcolor[gray]{.7} ", 
+                                          "\\rowcolor[gray]{.6} ", 
+                                          "\\rowcolor[gray]{.5} ")), 
+          file = file_name
+    )
+  } else {
+    file_name = paste0("outputs/simulations_", estimator, 
+                       "_LIN_HOM_MCAR_90.tex")
+    print(xtable_output,
+          floating = TRUE, latex.environments = "center",
+          include.rownames = FALSE, size="small", 
+          file = file_name
+    )
+  }
 }
 ####### Intended usage
 # # Save result as .tex file
@@ -204,12 +222,19 @@ prepare_all_estimator_table <- function(sim_table_df, approach){
 # # Summarize simulation results into df ready for export
 # xtable_df <- prepare_all_estimator_table(mean_simulations, "Semi-supervised")
 
-format_all_estimator_xtable <- function(xtable_df, n_sim, missing_type){
+format_all_estimator_xtable <- function(xtable_df, n_sim, missing_type, 
+                                        highlight = TRUE){
+  if (highlight) {
+    alignment <- c("l", "l", "l", "l", "c", "c", 
+                   ">{\\columncolor[gray]{.9}}c", 
+                   ">{\\columncolor[gray]{.9}}c")
+  } else {
+    alignment <- c("l", "l", "l", "l", "c", "c", "c", "c")
+  }
+  
   output <- xtable(
     xtable_df, type = "latex", 
-    align = c("l", "l", "l", "l", "c", "c", 
-              ">{\\columncolor[gray]{.9}}c", 
-              ">{\\columncolor[gray]{.9}}c"), 
+    align = alignment, 
     caption = paste0(n_sim, " simulations with outcomes ", missing_type)
   )
   return(output)
@@ -218,9 +243,16 @@ format_all_estimator_xtable <- function(xtable_df, n_sim, missing_type){
 # # Format simulation result table as xtable output
 # xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR")
 
-save_all_estimator_to_latex <- function(xtable_output, approach){
-  file_name = paste0("outputs/simulations_", approach, 
-                     "_ALL_EXP_LIN_HOM_MCAR_90.tex")
+save_all_estimator_to_latex <- function(xtable_output, approach, 
+                                        highlight = TRUE){
+  if (highlight) {
+    file_name = paste0("outputs/simulations_", approach, 
+                       "_ALL_EXP_LIN_HOM_MCAR_90_HIGHLIGHT.tex")
+  }
+  else {
+    file_name = paste0("outputs/simulations_", approach, 
+                       "_ALL_EXP_LIN_HOM_MCAR_90.tex")
+  }
   print(xtable_output,
         floating = TRUE, latex.environments = "center",
         include.rownames = FALSE, size="small", 
