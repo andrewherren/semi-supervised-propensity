@@ -1,0 +1,431 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%   Based on Beamer template created by Rodrigo Platte, Arizona State University, May 18 2007.
+%   Feel free to modify this file to generate your own presentation.
+%
+%   This Latex file should be compiled with pdflatex, for this reason, it is recommended 
+%   that you convert the figures in your presentation to pdf. Postscript files (.ps and .eps) 
+%   will not compile properly when pdflatex is used. You may use commands like "convert"
+%   or "eps2pdf" (in linux) to convert your figures. 
+%
+%   The final output is a PDF file that is best visualized with Adobe Reader.
+%
+%   More information can be found in beameruserguide.pdf
+%
+%   This presentation requires the following files:
+%   BEAMERoptions.tex, ASUlogo.pdf,  asu.pdf, beamerouterthememathASUlogo.sty
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\PassOptionsToPackage{table}{xcolor}
+\documentclass[compress]{beamer}
+% Use this instead for printing and distributing your slides (suppresses overlays)
+%\documentclass[handout]{beamer}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Edit the file BEAMERoptions.tex to change theme, color, fonts, logo, etc.     %
+\input{BEAMERoptions.tex}					                                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Load packages
+%%%%%%%%%%%%%%%%%%%%%
+\usepackage[english]{babel}
+\usepackage{graphics}
+\usepackage{colortbl}
+\usepackage{multimedia} % for movies and sound
+\usepackage{times}
+\usepackage{multirow}
+\usepackage[round]{natbib}
+\usepackage[table]{xcolor}
+%%%%%%%%%%%%%%%%%%%%%
+
+
+%% The title and name 
+%% Note: [short title]{long title}, [short author(s) name]{long author(s) name}
+\title[Semi-supervised propensity score adjustment]{Semi-supervised propensity score adjustment}
+\author[D. Herren]{\emph{Andrew Herren} }
+\date[]{}
+% Show ASU logo in title page
+%%%%%%%%%%%%%%%%%%%%%%
+\institute[Mathematics and Statistics]{
+\includegraphics[height=.85cm]{ASUlogo.pdf} \\
+{\color{ASUred} SCHOOL OF \textbf{MATHEMATICAL AND STATISTICAL SCIENCES}}}
+%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%% Presentation Starts Here %%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%%% Title frame %%%%%
+\begin{frame}[plain]
+	\titlepage
+	\transboxout
+\end{frame}
+
+%%%% Outline (optional) %%%%%%%%%%%%%%%%%%%%%
+%% The outline depends on \section and \subsection commands
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\begin{frame}
+%  \frametitle{Outline}
+%  \tableofcontents[pausesections]
+%  \transboxin
+%\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section[Problem Statement]{Problem Statement}
+
+\begin{frame} \frametitle{Notation and problem statement}
+ \begin{itemize}
+  \item Let $Y$ be an outcome of interest (e.g. blood pressure)
+  \item Let $Z$ be an intervention that may impact $Y$ (e.g. a new medicine)
+  \item Let $X$ be a vector of covariates (e.g. demographics, health status)
+  \end{itemize}
+
+\pause
+
+\bigskip
+\bigskip
+
+ \begin{itemize}
+  \item Causal inference = concerned with counterfactuals
+  \item Only observe $Y$ when $Z = 1$ or $Z = 0$
+  \item Define Average Treatment Effect (ATE) as:
+ \end{itemize}
+ \[E_X[E[Y | X, Z = 1] - E[Y | X, Z = 0]]\]
+
+
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{Propensity scores}
+Propensity score ($p(X)$) is probability of receiving treatment $(P(Z = 1 | X))$
+ \begin{itemize}
+  \item Assumption of \textit{\textbf{strong ignorability}}\footnote[frame]{\cite{rosenbaum1983central}}: $0 < p < 1$ and only depends on $X$
+  \item $p(X)$ balances differences between treatment and control groups:
+  \begin{itemize}
+	\item $Y \perp Z \; | \; p(X)$
+  \end{itemize}
+ \end{itemize}
+
+\pause 
+
+\bigskip
+\bigskip
+\bigskip
+
+\textbf{Importance}: many methods use $p(X)$ to estimate ATE, in two steps
+  \begin{enumerate}
+	\item Estimate propensity scores based on $X$
+	\item Incorporate estimated propensities in ATE estimation procedure (weighting, matching, regression)
+  \end{enumerate}
+
+\transboxin
+\end{frame}
+
+
+\begin{frame} \frametitle{Semi-supervised learning}
+Semi-supervised learning\footnote[frame]{\cite{liang2007use}}: supervised learning with 
+partially observed $Y$
+
+\medskip
+\begin{center}
+\begin{tabular}{ |p{1cm}|p{1cm}|p{1cm}|p{1cm}|p{1cm}|p{1cm}|p{1cm}|p{1cm}|  }
+\hline
+${\bf Y}$ & ${\bf Z}$ & ${\bf X_1}$ & ${\bf X_2}$ & ${\bf X_3}$ & ... & ... & ${\bf X_p}$ \\
+\hline
+$y_1$ & $z_1$ & $x_{11}$ & $x_{21}$ & $x_{31}$ & ... & ... & $x_{p1}$ \\
+$y_2$ & $z_2$ & $x_{12}$ & $x_{22}$ & $x_{32}$ & ... & ... & $x_{p2}$ \\
+... & ... & ... & ... & ... & ... & ... & ... \\
+\hline
+\cellcolor{lightgray} & ... & ... & ... & ... & ... & ... & ... \\
+\cellcolor{lightgray} & $z_k$ & $x_{1, k}$ & $x_{2, k}$ & $x_{3, k}$ & ... & ... & $x_{p, k}$ \\
+\cellcolor{lightgray} & $z_{k+1}$ & $x_{1, k+1}$ & $x_{2, k+1}$ & $x_{3, k+1}$ & ... & ... & $x_{p, k+1}$ \\
+\cellcolor{lightgray} & ... & ... & ... & ... & ... & ... & ... \\
+\cellcolor{lightgray} & ... & ... & ... & ... & ... & ... & ... \\
+\cellcolor{lightgray} & $z_{n}$ & $x_{1, n}$ & $x_{2, n}$ & $x_{3, n}$ & ... & ... & $x_{p, n}$ \\
+\hline
+\end{tabular}
+\end{center}
+
+\transboxin
+\end{frame}
+
+\section[Methods]{Methods}
+
+\begin{frame} \frametitle{How to make use of unlabeled data}
+We consider three cases:
+\begin{itemize}
+\item Complete case analysis: labeled observations only for $p$ and ATE
+\item Semi-supervised learning: estimate $p$ with unlabeled $X$ and $Z$
+\item Ground truth: use the true propensities to estimate ATE
+\end{itemize}
+
+\bigskip
+\bigskip
+\bigskip
+\bigskip
+Motivation: unlabeled data will bring us closer to true propensities
+\end{frame}
+
+\begin{frame} \frametitle{ATE estimators}
+\begin{itemize}
+\item Inverse propensity weighting (IPW) estimator\footnote[frame]{\cite{hirano2003efficient}, \cite{cerulli2014treatrew}}
+\[\widehat{\textrm{ATE}} = \frac{1}{n} \sum_{i = 1}^{n} \left( \frac{Y_i Z_i}{P(Z_i = 1 | X_i)} - \frac{Y_i (1 - Z_i)}{(1 - P(Z_i = 1 | X_i))} \right) \]
+\item Targeted maximum likelihood estimator (TMLE) \footnote[frame]{\cite{van2010targeted}, \cite{van2010targeted2}, \cite{gruber2009targeted}}
+\[\widehat{\textrm{ATE}} = \frac{1}{n} \sum_{i = 1}^{n} \left( Q^*\left( Z_i = 1, X_i \right) - Q^*\left( Z_i = 0, X_i \right) \right) \] 
+\item Bayesian causal forests (BCF)\footnote[frame]{\cite{hahn2017bayesian}}
+\[f(X_i, Z_i) = \mu(X_i, \hat{p_i}) + \tau(X_i) Z_i \]
+\[\widehat{\textrm{ATE}} = \frac{1}{n} \sum_{i = 1}^{n} \left( f(X_i, Z_i = 1) - f(X_i, Z_i = 0) \right) \]
+\end{itemize}
+\end{frame}
+
+\begin{frame} \frametitle{Fitting the propensity model}
+
+When estimating propensities, we consider two approaches:
+
+\begin{enumerate}
+\item Logistic regression
+\begin{itemize}
+\item $\hat{p} = \frac{1}{1 + \exp(-(\hat{\mathbf{\beta}}X))}$
+\item Logistic regression is only considered in the context of the IPW estimator
+\end{itemize}
+\item Bayesian additive regression trees (BART) (\cite{chipman2010bart})
+\begin{itemize}
+\item $\hat{p}$ estimated by a nonparametric Bayesian tree ensemble
+\end{itemize}
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame} \frametitle{Data generating processes}
+We simulate data according to the following relationship between $X$, $Y$, and $Z$:
+
+\begin{align*}
+Y &= \mu(X) + \tau Z + \varepsilon\\
+\mu(X) &= 
+\begin{cases}
+3 + x_1 x_3,&  x_5 = 1,\\
+x_1 x_3,&  x_5 = 2\\
+-3 + x_1 x_3,&  x_5 = 3
+\end{cases} \\
+x_1, x_2, x_3 &\sim \mathcal{N}(0, 1)\\
+x_4 &\sim \textrm{Bernoulli}(0.5)\\
+x_5 &\sim \textrm{Categorical}(0.25, 0.5, 0.25)\\
+\tau &= 3\\
+\varepsilon &\sim \mathcal{N}(0, 1)\\
+\end{align*}
+
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{Propensity model}
+We consider two cases for obtaining simulated propensities:
+
+\begin{enumerate}
+\item Randomized treatment assignment: $P(Z = 1 | X) = 0.5$
+\item Targeted selection\footnote[frame]{\cite{hahn2017bayesian}}: $P(Z = 1 | X) = 0.8\Phi(3 \mu(X) / s - 0.5 x_1) + 0.05 + u / 10$
+\begin{itemize}
+	\item $\Phi(\cdot)$ is the standard normal CDF
+	\item $s$ is the sample standard deviation of simulated observation of $\mu(X)$
+	\item $u \sim \mathrm{Uniform}(0, 1)$ 
+\end{itemize}
+\end{enumerate}
+
+\bigskip
+Targeted selection is challenging for most causal inference methods
+\end{frame}
+
+\section[Simulation results]{Simulation results}
+
+\begin{frame} \frametitle{Simulation evaluations}
+We evaluate the following metrics
+
+\begin{itemize}
+	\item \textbf{RMSE}: root mean squared error of estimated treatment effects
+	\item \textbf{Bias}: difference between true ATE (3) and average estimated ATE
+	\item \textbf{Coverage}: share of 95\% confidence intervals that contain the true ATE
+\end{itemize}
+
+\transboxin
+\end{frame}
+
+\begin{frame}
+\vfill
+\centering
+\begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+\usebeamerfont{title}Targeted selection\par%
+\end{beamercolorbox}
+\vfill
+\end{frame}
+
+\begin{frame} \frametitle{Simulation evaluations}
+These simulations are drawn assuming targeted selection
+
+\begin{itemize}
+	\item 90\% of the data missing outcome labels
+	\item Outcomes are unlabeled completely at random (MCAR)
+	\item Sample sizes range from 500, 1,000, 5,000
+	\item Treatment effects homogeneous ($\tau=3$)
+\end{itemize}
+
+\transboxin
+\end{frame}
+
+
+\begin{frame} \frametitle{How to read these tables}
+Focus attention on bias and coverage metrics
+\begin{itemize}
+	\item Bias should be close to 0
+	\item Interval coverage should be close to 95\%
+\end{itemize}
+
+Table rows: increasing order of unlabeled data usage / ground truth
+
+\begin{table}[ht]
+\centering
+\begingroup\small
+\begin{tabular}{lllcc>{\columncolor[gray]{.9}}c>{\columncolor[gray]{.9}}c}
+  \hline
+Approach & N & \# labeled & ATE & RMSE & Bias & Coverage \\ 
+  \hline
+Complete Case &  500 & 50 & $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\ 
+  Complete Case & 1,000 & 100 & $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\ 
+  Complete Case & 5,000 & 500 & $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\ 
+   \rowcolor[gray]{.8} Semi-supervised &   500 &  50 & $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\ 
+   \rowcolor[gray]{.7} Semi-supervised & 1,000 & 100 & $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\ 
+   \rowcolor[gray]{.6} Semi-supervised & 5,000 & 500 & $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\ 
+   \rowcolor[gray]{.5} True propensities & 5,000 & 500 & $\cdot$ & $\cdot$ & $\cdot$ & $\cdot$ \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{n simulations with outcomes MCAR} 
+\end{table}
+
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{IPW / logistic regression with targeted selection}
+Data: Homogeneous treatment effects with targeted selection
+
+Model: IPW estimator, with propensities fit using logistic regression
+
+\input{../outputs/simulations_IPW_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+
+A mis-specified propensity model results in \textbf{badly} biased ATE estimates
+and poor coverage, and unlabeled data not helpful
+
+%\input{../outputs/simulations_IPW_LIN_HOM_MAR_Linear_90.tex}
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{IPW / BART with targeted selection}
+Data: Homogeneous treatment effects with targeted selection
+
+Model: IPW estimator, with propensities fit using BART
+
+\input{../outputs/simulations_IPW_BART_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+
+Properly specified propensity scores improve bias and interval coverage
+
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{TMLE / BART with targeted selection}
+Data: Homogeneous treatment effects with targeted selection
+
+Model: TMLE, with BART for propensity and outcome model
+
+\input{../outputs/simulations_TMLE_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+
+TMLE provides roughly unbiased results with larger N, but poor interval coverage
+
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{BCF with targeted selection}
+Data: Homogeneous treatment effects with targeted selection
+
+Model: Bayesian causal forests (BCF)
+
+\input{../outputs/simulations_BCF_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+
+BCF works best and provides strong coverage
+
+\transboxin
+\end{frame}
+
+\begin{frame}
+\vfill
+\centering
+\begin{beamercolorbox}[sep=8pt,center,shadow=true,rounded=true]{title}
+\usebeamerfont{title}Randomized treatment assignment\par
+\end{beamercolorbox}
+\vfill
+\end{frame}
+
+\begin{frame} \frametitle{Simulation evaluations}
+These simulations are drawn assuming randomized treatment assignment
+
+\begin{itemize}
+	\item 90\% of the data missing outcome labels
+	\item Outcomes are unlabeled completely at random (MCAR)
+	\item Sample sizes range from 500, 1,000, 5,000
+	\item Treatment effects homogeneous ($\tau=3$)
+\end{itemize}
+
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{Complete case estimates with randomized treatment assignment}
+In the randomized assignment case, all methods work quite well
+
+\input{../outputs/simulations_CC_ALL_EXP_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{Semi-supervised estimates with randomized treatment assignment}
+But unlabeled data still helpful for IPW estimates
+
+\input{../outputs/simulations_SSL_ALL_EXP_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{Conclusion}
+ \begin{itemize}
+  \item No amount of unlabeled data will fix a mis-specified propensity model
+  \begin{itemize}
+  \item Can even harm inferences by reducing variance around a biased estimate
+  \end{itemize}
+  \item BCF and IPW/BART both work best on targeted selection data
+  \item Learning ATE with experimental data much easier
+ \end{itemize}
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{Future work}
+ \begin{itemize}
+  \item Articulate results using semi-supervised learning theory\footnote[frame]{\cite{belkin2006manifold}}
+  \item Complex outcome functions
+  \item Heterogeneous treatment effects
+  \item Unlabeled outcomes correlated with covariates 
+  \item Connection to survey inference / superpopulation modeling
+ \end{itemize}
+\transboxin
+\end{frame}
+
+\begin{frame} \frametitle{}
+ \begin{center}
+	\Huge Questions?
+ \end{center}
+\transboxin
+\end{frame}
+
+\begin{frame}[allowframebreaks] \frametitle{References}
+\bibliographystyle{plainnat} 
+\bibliography{Presentation-Slides}
+\end{frame}
+
+\end{document}
