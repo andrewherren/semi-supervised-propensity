@@ -310,12 +310,12 @@ Data: Homogeneous treatment effects with targeted selection
 
 Model: IPW estimator, with propensities fit using logistic regression
 
-\input{../outputs/simulations_IPW_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+\input{../../outputs/simulations_IPW_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
 
 A mis-specified propensity model results in \textbf{badly} biased ATE estimates
 and poor coverage, and unlabeled data not helpful
 
-%\input{../outputs/simulations_IPW_LIN_HOM_MAR_Linear_90.tex}
+%\input{../../outputs/simulations_IPW_LIN_HOM_MAR_Linear_90.tex}
 \transboxin
 \end{frame}
 
@@ -324,7 +324,7 @@ Data: Homogeneous treatment effects with targeted selection
 
 Model: IPW estimator, with propensities fit using BART
 
-\input{../outputs/simulations_IPW_BART_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+\input{../../outputs/simulations_IPW_BART_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
 
 Properly specified propensity scores improve bias and interval coverage
 
@@ -336,7 +336,7 @@ Data: Homogeneous treatment effects with targeted selection
 
 Model: TMLE, with BART for propensity and outcome model
 
-\input{../outputs/simulations_TMLE_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+\input{../../outputs/simulations_TMLE_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
 
 TMLE provides roughly unbiased results with larger N, but poor interval coverage
 
@@ -348,7 +348,7 @@ Data: Homogeneous treatment effects with targeted selection
 
 Model: Bayesian causal forests (BCF)
 
-\input{../outputs/simulations_BCF_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+\input{../../outputs/simulations_BCF_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
 
 BCF works best and provides strong coverage
 
@@ -380,7 +380,7 @@ These simulations are drawn assuming randomized treatment assignment
 \begin{frame} \frametitle{Complete case estimates with randomized treatment assignment}
 In the randomized assignment case, all methods work quite well
 
-\input{../outputs/simulations_CC_ALL_EXP_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+\input{../../outputs/simulations_CC_ALL_EXP_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
 
 \transboxin
 \end{frame}
@@ -388,7 +388,7 @@ In the randomized assignment case, all methods work quite well
 \begin{frame} \frametitle{Semi-supervised estimates with randomized treatment assignment}
 But unlabeled data still helpful for IPW estimates
 
-\input{../outputs/simulations_SSL_ALL_EXP_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
+\input{../../outputs/simulations_SSL_ALL_EXP_LIN_HOM_MCAR_90_HIGHLIGHT.tex}
 
 \transboxin
 \end{frame}
