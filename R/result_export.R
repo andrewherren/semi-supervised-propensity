@@ -4,10 +4,15 @@
 # Save simulation output
 
 # Write overall simulation table for later access
-save_simulation_output <- function(simulation_results_df, prefix){
-  csv_datetime <- paste0(prefix, format(Sys.time(), "%Y%m%d%H%M"), ".csv")
-  output.file.name <- file.path(project_dir, "outputs", 
-                                "simulation", csv_datetime)
+save_simulation_output <- function(simulation_results_df, prefix, datestamp_input = "", snapshot = TRUE){
+  require(here)
+  project_dir <- here()
+  datestamp = ifelse(datestamp_input == "", format(Sys.time(), "%Y%m%d%H%M"), datestamp_input)
+  csv_datetime <- paste0(prefix, datestamp, ".csv")
+  output.file.name <- ifelse(snapshot, 
+                             file.path(project_dir, "outputs", 
+                                       "snapshots", datestamp, csv_datetime), 
+                             file.path(project_dir, "outputs", csv_datetime))
   write.csv(simulation_results_df, output.file.name, row.names = FALSE)
 }
 
@@ -138,11 +143,18 @@ format_per_estimator_xtable <- function(xtable_df, n_sim,
 # # Format simulation result table as xtable output
 # xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR")
 
-save_per_estimator_to_latex <- function(xtable_output, estimator, 
-                                        highlight = TRUE){
+save_per_estimator_to_latex <- function(xtable_output, estimator, datestamp_input = "", 
+                                        snapshot = TRUE, highlight = TRUE){
+  require(here)
+  project_dir <- here()
+  datestamp = ifelse(datestamp_input == "", format(Sys.time(), "%Y%m%d%H%M"), datestamp_input)
+  save_path = ifelse(snapshot, file.path(project_dir, "outputs", "snapshots", datestamp), 
+                     file.path(project_dir, "outputs"))
+  
   if (highlight){
-    file_name = paste0("outputs/simulations_", estimator, 
+    file_name = paste0("simulations_", estimator, 
                        "_LIN_HOM_MCAR_90_HIGHLIGHT.tex")
+    file_path = file.path(save_path, file_name)
     print(xtable_output,
           floating = TRUE, latex.environments = "center",
           include.rownames = FALSE, size="small", 
@@ -150,15 +162,16 @@ save_per_estimator_to_latex <- function(xtable_output, estimator,
                                           "\\rowcolor[gray]{.7} ", 
                                           "\\rowcolor[gray]{.6} ", 
                                           "\\rowcolor[gray]{.5} ")), 
-          file = file_name
+          file = file_path
     )
   } else {
-    file_name = paste0("outputs/simulations_", estimator, 
+    file_name = paste0("simulations_", estimator, 
                        "_LIN_HOM_MCAR_90.tex")
+    file_path = file.path(save_path, file_name)
     print(xtable_output,
           floating = TRUE, latex.environments = "center",
           include.rownames = FALSE, size="small", 
-          file = file_name
+          file = file_path
     )
   }
 }
@@ -243,20 +256,28 @@ format_all_estimator_xtable <- function(xtable_df, n_sim, missing_type,
 # # Format simulation result table as xtable output
 # xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR")
 
-save_all_estimator_to_latex <- function(xtable_output, approach, 
-                                        highlight = TRUE){
+save_all_estimator_to_latex <- function(xtable_output, approach, datestamp_input = "", 
+                                        snapshot = TRUE, highlight = TRUE){
+  require(here)
+  project_dir <- here()
+  datestamp = ifelse(datestamp_input == "", format(Sys.time(), "%Y%m%d%H%M"), datestamp_input)
+  save_path = ifelse(snapshot, file.path(project_dir, "outputs", "snapshots", datestamp), 
+                     file.path(project_dir, "outputs"))
+  
   if (highlight) {
-    file_name = paste0("outputs/simulations_", approach, 
+    file_name = paste0("simulations_", approach, 
                        "_ALL_EXP_LIN_HOM_MCAR_90_HIGHLIGHT.tex")
+    file_path = file.path(save_path, file_name)
   }
   else {
-    file_name = paste0("outputs/simulations_", approach, 
+    file_name = paste0("simulations_", approach, 
                        "_ALL_EXP_LIN_HOM_MCAR_90.tex")
+    file_path = file.path(save_path, file_name)
   }
   print(xtable_output,
         floating = TRUE, latex.environments = "center",
         include.rownames = FALSE, size="small", 
-        file = file_name
+        file = file_path
   )
 }
 ####### Intended usage

@@ -4,25 +4,24 @@
 
 ##########################################################
 # Set up working environment
-project_dir <- "~/Github/semi-supervised-propensity"
-setwd(project_dir)
-source("R/setup.R", local=FALSE, echo=TRUE)
-source("R/simulation.R", local=FALSE, echo=TRUE)
-source("R/estimator.R", local=FALSE, echo=TRUE)
-source("R/reporting.R", local=FALSE, echo=TRUE)
-source("R/result_export.R", local=FALSE, echo=TRUE)
-# source("R/propensity_score.R", local=FALSE, echo=TRUE)
-project_dir <- "~/Github/semi-supervised-propensity"
-setwd(project_dir)
-output_file = file(paste0("outputs/R_log_", format(Sys.time(), 
-                   "%Y%m%d%H%M"), ".txt"), "w")
+require(here)
+project_dir <- here()
+source(file.path(project_dir, "R", "setup.R"), local=FALSE, echo=TRUE)
+source(file.path(project_dir, "R", "simulation.R"), local=FALSE, echo=TRUE)
+source(file.path(project_dir, "R", "estimator.R"), local=FALSE, echo=TRUE)
+source(file.path(project_dir, "R", "reporting.R"), local=FALSE, echo=TRUE)
+source(file.path(project_dir, "R", "result_export.R"), local=FALSE, echo=TRUE)
+# source(file.path(project_dir, "R", "propensity_score.R"), local=FALSE, echo=TRUE)
+datestamp = format(Sys.time(), "%Y%m%d%H%M")
+logfile_name = file.path(project_dir, "log", paste0("R_batch_log_", datestamp, ".log"))
+output_file = file(logfile_name, "w")
 
 ##########################################################
 # Simulation initialization and loop code
 
 # Load cached datasets and run results
 n_methods = 16
-n_sim = 500
+n_sim = 1
 n_dgps = 6
 # n_columns = 15
 n_df = n_sim*n_dgps*n_methods
@@ -152,8 +151,12 @@ close(output_file)
 ##########################################################
 # Save simulation output
 
+# Create new "snapshots" folder, if doesn't exist
+snapshots_subfolder = file.path(project_dir, "outputs", "snapshots", datestamp)
+ifelse(!dir.exists(snapshots_subfolder), dir.create(snapshots_subfolder), FALSE)
+
 # Write overall simulation table for later access
-save_simulation_output(output_df, "sim_")
+save_simulation_output(output_df, "sim_", datestamp_input = datestamp, snapshot = TRUE)
 
 # Collapse results into table of averages
 mean_simulations <- summarize_simulation_results(output_df)
@@ -162,7 +165,8 @@ mean_simulations <- summarize_simulation_results(output_df)
 mean_simulations <- format_simulation_outputs(mean_simulations)
 
 # Write overall simulation summary to a CSV file
-save_simulation_output(mean_simulations, "summary_table_")
+save_simulation_output(mean_simulations, "summary_table_", 
+                       datestamp_input = datestamp, snapshot = TRUE)
 
 ##########################################################
 # Save as Latex tables for use in paper / presentation
@@ -177,13 +181,17 @@ xtable_df <- prepare_per_estimator_table(mean_simulations, "IPW")
 # For presentation - with highlights
 xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = TRUE)
-save_per_estimator_to_latex(xtable_output, "IPW", 
-                            highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "IPW", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "IPW", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = TRUE)
 # For paper - no highlights
 xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = FALSE)
-save_per_estimator_to_latex(xtable_output, "IPW", 
-                            highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "IPW", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "IPW", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = FALSE)
 
 ### Second output table
 #  - Semi-supervised
@@ -195,13 +203,17 @@ xtable_df <- prepare_per_estimator_table(mean_simulations, "IPW_BART")
 # For presentation - with highlights
 xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = TRUE)
-save_per_estimator_to_latex(xtable_output, "IPW_BART", 
-                            highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "IPW_BART", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "IPW_BART", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = TRUE)
 # For paper - no highlights
 xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = FALSE)
-save_per_estimator_to_latex(xtable_output, "IPW_BART", 
-                            highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "IPW_BART", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "IPW_BART", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = FALSE)
 
 ### Third output table
 #  - Semi-supervised
@@ -213,13 +225,17 @@ xtable_df <- prepare_per_estimator_table(mean_simulations, "TMLE")
 # For presentation - with highlights
 xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = TRUE)
-save_per_estimator_to_latex(xtable_output, "TMLE", 
-                            highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "TMLE", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "TMLE", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = TRUE)
 # For paper - no highlights
 xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = FALSE)
-save_per_estimator_to_latex(xtable_output, "TMLE", 
-                            highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "TMLE", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "TMLE", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = FALSE)
 
 ### Fourth output table
 #  - Semi-supervised
@@ -231,13 +247,17 @@ xtable_df <- prepare_per_estimator_table(mean_simulations, "BCF")
 # For presentation - with highlights
 xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = TRUE)
-save_per_estimator_to_latex(xtable_output, "BCF", 
-                            highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "BCF", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = TRUE)
+save_per_estimator_to_latex(xtable_output, "BCF", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = TRUE)
 # For paper - no highlights
 xtable_output <- format_per_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = FALSE)
-save_per_estimator_to_latex(xtable_output, "BCF", 
-                            highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "BCF", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = FALSE)
+save_per_estimator_to_latex(xtable_output, "BCF", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = FALSE)
 
 ### Fifth output table
 #  - Complete case
@@ -249,13 +269,17 @@ xtable_df <- prepare_all_estimator_table(mean_simulations, "Complete Case")
 # For presentation - with highlights
 xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = TRUE)
-save_all_estimator_to_latex(xtable_output, "CC", 
-                            highlight = TRUE)
+save_all_estimator_to_latex(xtable_output, "CC", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = TRUE)
+save_all_estimator_to_latex(xtable_output, "CC", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = TRUE)
 # For paper - no highlights
 xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = FALSE)
-save_all_estimator_to_latex(xtable_output, "CC", 
-                            highlight = FALSE)
+save_all_estimator_to_latex(xtable_output, "CC", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = FALSE)
+save_all_estimator_to_latex(xtable_output, "CC", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = FALSE)
 
 ### Sixth output table
 #  - Semi-supervised
@@ -267,10 +291,14 @@ xtable_df <- prepare_all_estimator_table(mean_simulations, "Semi-supervised")
 # For presentation - with highlights
 xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = TRUE)
-save_all_estimator_to_latex(xtable_output, "SSL", 
-                            highlight = TRUE)
+save_all_estimator_to_latex(xtable_output, "SSL", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = TRUE)
+save_all_estimator_to_latex(xtable_output, "SSL", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = TRUE)
 # For paper - no highlights
 xtable_output <- format_all_estimator_xtable(xtable_df, n_sim, "MCAR", 
                                              highlight = FALSE)
-save_all_estimator_to_latex(xtable_output, "SSL", 
-                            highlight = FALSE)
+save_all_estimator_to_latex(xtable_output, "SSL", datestamp_input = datestamp, 
+                            snapshot = TRUE, highlight = FALSE)
+save_all_estimator_to_latex(xtable_output, "SSL", datestamp_input = datestamp, 
+                            snapshot = FALSE, highlight = FALSE)
