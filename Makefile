@@ -11,11 +11,11 @@ PAPERTEXFILE=$(PAPERTEXDIR)/semi-supervised-propensity
 
 # Latex paper
 $(PAPERTEXFILE).pdf:	$(PAPERTEXFILE).tex
-	latexmk -pdf -cd $(PAPERTEXFILE) -outdir=$(PAPERTEXDIR)
+	latexmk -pdf -cd $(PAPERTEXFILE)
 
 # Presentation
 $(PRESTEXFILE).pdf:	$(PRESTEXFILE).tex
-	latexmk -pdf -cd $(PRESTEXFILE) -outdir=$(PRESTEXDIR)
+	latexmk -pdf -cd $(PRESTEXFILE)
 
 # R output
 $(LOGDIR)/batch_R_script.Rout:	$(RDIR)/run_cached_files.R
@@ -29,4 +29,4 @@ presentation:	$(PRESTEXFILE).pdf
 r:	$(LOGDIR)/batch_R_script.Rout
 
 # Build everything
-.PHONY:	r	presentation	paper
+all:	r	presentation	paper

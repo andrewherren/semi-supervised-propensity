@@ -21,7 +21,7 @@ output_file = file(logfile_name, "w")
 
 # Load cached datasets and run results
 n_methods = 16
-n_sim = 1
+n_sim = 500
 n_dgps = 6
 # n_columns = 15
 n_df = n_sim*n_dgps*n_methods
