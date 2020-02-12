@@ -4,16 +4,18 @@
 # User inputs
 LOGDIR=log
 RDIR=R
-PAPERTEXFILE=reports/paper/semi-supervised-propensity
-PRESTEXFILE=reports/presentation/Presentation-Slides
+PRESTEXDIR=reports/presentation
+PRESTEXFILE=$(PRESTEXDIR)/Presentation-Slides
+PAPERTEXDIR=reports/paper
+PAPERTEXFILE=$(PAPERTEXDIR)/semi-supervised-propensity
 
 # Latex paper
 $(PAPERTEXFILE).pdf:	$(PAPERTEXFILE).tex
-	latexmk -pdf -cd -quiet $(PAPERTEXFILE)
-	
+	latexmk -pdf -cd $(PAPERTEXFILE) -outdir=$(PAPERTEXDIR)
+
 # Presentation
 $(PRESTEXFILE).pdf:	$(PRESTEXFILE).tex
-	latexmk -pdf -cd -quiet $(PRESTEXFILE)
+	latexmk -pdf -cd $(PRESTEXFILE) -outdir=$(PRESTEXDIR)
 
 # R output
 $(LOGDIR)/batch_R_script.Rout:	$(RDIR)/run_cached_files.R
