@@ -76,7 +76,7 @@
 \date{}
 
 \begin{abstract}
-We extend the notion of semi-supervised learning to causal inference by considering data as "unlabeled"
+We extend the notion of semi-supervised learning to causal inference by considering data as ``unlabeled"
 if treatment assignment and covariates are observed but outcomes are unobserved. 
 We demonstrate how to make use of unlabeled data in estimating the average treatment effect, 
 and validate the results using simulation studies.
@@ -123,7 +123,7 @@ data solely to calculate propensity scores.
 \subsection{Notation}
 
 Consider a dataset with $n$ observations. Let $\Y$ denote the outcome of interest, which we assume to be only partially observed. 
-We refer to the data points with observed outcomes as "labeled data," and let $n_o$ refer to the number of such labeled observations 
+We refer to the data points with observed outcomes as ``labeled data," and let $n_o$ refer to the number of such labeled observations 
 and $n_m = n - n_o$ refer to the number of data points with missing outcomes.
 Let $\X$ denote covariates, which includes information that may predict treatment assignment, outcomes, or both. 
 In many applied settings, covariates include demographics, health markers, or various self-reported behaviors.
@@ -147,15 +147,15 @@ we define $\textrm{ATE} = \E_X[\E[Y | X, Z = 1] - \E[Y | X, Z = 0]]$ as the popu
 not receive treatment. The ATE can be estimated by a number of procedures. This paper will focus on several procedures which make use of estimated propensity scores.
 
 The first method we evaluate is the Inverse Propensity Weighted (IPW) estimator of the ATE (\cite{hirano2003efficient}, \cite{cerulli2014treatrew}), defined as
-\[ \widehat{\textrm{ATE}}_{IPW} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( \frac{Y_i Z_i}{\hat{p_i}} - \frac{Y_i (1 - Z_i)}{(1 - \hat{p_i})} \right) \]
+\[ \widehat{\textrm{ATE}_{\textrm{IPW}}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( \frac{Y_i Z_i}{\hat{p_i}} - \frac{Y_i (1 - Z_i)}{(1 - \hat{p_i})} \right) \]
 where the propensity score, $\hat{p_i} = \hat{p_i}(Z_i = z | X_i)$, is an estimate of the probability of receiving treatment conditional on covariates $X_i$ (\cite{rosenbaum1983central}).
 
 Next, we consider the targeted maximum likelihood estimator (TMLE) (\cite{van2010targeted}, \cite{van2010targeted2}, \cite{gruber2009targeted})
-\[\widehat{\textrm{ATE}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( Q^*\left( Z_i = 1, X_i \right) - Q^*\left( Z_i = 0, X_i \right) \right)\]
+\[\widehat{\textrm{ATE}_{\textrm{TMLE}}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( Q^*\left( Z_i = 1, X_i \right) - Q^*\left( Z_i = 0, X_i \right) \right)\]
 where $Q^*\left( Z_i, X_i \right)$ represents a semi-parametric model of the outcome $Y$ which incorporates an estimate of the propensity model.
 
 Finally, we consider Bayesian causal forests (BCF) (\cite{hahn2017bayesian})
-\[\widehat{\textrm{ATE}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( f(X_i, Z_i = 1) - f(X_i, Z_i = 0) \right) \]
+\[\widehat{\textrm{ATE}_{\textrm{BCF}}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( f(X_i, Z_i = 1) - f(X_i, Z_i = 0) \right) \]
 where $f(X_i, Z_i)$ is a combination of two BART (\cite{chipman2010bart}) models, defined as $f(X_i, Z_i) = \mu(X_i, \hat{p_i}) + \tau(X_i) Z_i$ and $\hat{p_i}$ is an estimate of the propensity score.
 
 Each of these methods is evaluated according to three approaches:
@@ -235,9 +235,9 @@ For treatment assignment, we consider two cases:
 \end{itemize}
 \end{enumerate}
 
-The second treatment assignment mechanism is described as "Targeted Selection" in \cite{hahn2017bayesian}, and 
+The second treatment assignment mechanism is described as ``Targeted Selection" in \cite{hahn2017bayesian}, and 
 refers to the simple phenomenon of assigning treatment based on the expected value of the outcome for those who don't receive 
-treatment. This could be motivated quite simply as a physician's mental calculus of "how much worse will these symptoms get if I don't 
+treatment. This could be motivated quite simply as a physician's mental calculus of ``how much worse will these symptoms get if I don't 
 assign treatment."
 
 In order to simulate the process by which outcomes are unlabeled, we assume that 90\% of the data is unlabeled and that the status of $\M = 0$ or $\M = 1$
@@ -295,7 +295,9 @@ unlabeled data reduces the variance of the IPW estimates, so that coverage is cl
 
 \section{Discussion}
 
-%\subsection{Theoretical motivation of semi-supervised propensity score results}
+\subsection{Theoretical motivation of semi-supervised propensity score results}
+
+%To see why using unlabeled data is, consider the 
 
 \subsection{Parallels to survey inference}
 
@@ -310,7 +312,7 @@ As response rates decline for traditional probability surveys (\cite{kennedy2019
 practitioners will be forced to rely increasingly on non-probability surveys.
 \cite{mkks2017} have drawn connections between observational causal inference and non-probability surveys. 
 The semi-supervised propensity score method extends quite naturally to non-probability survey estimation 
-by treating auxiliary data (from federal surveys, the Census Bureau, etc...) as "unlabeled."
+by treating auxiliary data (from federal surveys, the Census Bureau, etc...) as ``unlabeled."
 
 \subsection{Further work}
 
