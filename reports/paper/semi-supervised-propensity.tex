@@ -293,11 +293,82 @@ unlabeled data reduces the variance of the IPW estimates, so that coverage is cl
 
 \input{../../outputs/simulations_SSL_ALL_EXP_LIN_HOM_MCAR_90.tex}
 
+\subsection{Real Data Example}
+
+\subsubsection{NHEFS}
+
+Following \cite{hernan2020causal}, we use data from the National Health and Nutrition Examination Survey Data I Epidemiologic Follow-up Study (NHEFS) 
+to estimate the effect of quitting smoking on weight gain. 
+We use a modified version of the NHEFS data available on the book website for \cite{hernan2020causal}\footnote{https://www.hsph.harvard.edu/miguel-hernan/causal-inference-book/}. 
+Following the discussion in Chapter 12, we remove missing values for any of the data fields which will be used in estimating the ATE: age, sex, race, weight in 1971, weight in 1982, height, 
+education level, frequency of alcohol consumption, number of daily cigarettes smoked in 1971, and the change in number of daily cigarettes smoked between 1971 and 1982.
+
+After making these adjustments, we summarize the differences in the treatment and control groups across a number of variables and see that the results closely match those of \cite{hernan2020causal}.
+
+\begin{table}[ht]
+\centering
+\begingroup\small
+\begin{tabular}{lllrrr}
+  \hline
+Treatment Status & Age & \% Men & \% White & Weight (kg), 1971 & Cigarettes per day, 1971 \\ 
+  \hline
+Quit smoking & 46.2 & 54.6 & 91.1 & 72.4 & 18.6 \\ 
+Have not quit smoking & 42.8 & 46.6 & 85.4 & 70.3 & 21.2 \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{NHEFS - summary of covariates by treatment group} 
+\end{table}
+
+Given the two approaches which showed the strongest finite sample properties in simulation studies were IPW-BART and BCF, we use 
+both approaches to estimate the average effect on weight gain of quitting smoking.
+In each case, we use the same eleven potential confounders as covariates in a propensity model and estimate the overall ATE either via IPW or BCF.
+With IPW-BART, we estimate an average treatment effect of 3.0 kilograms with a 95\% confidence interval of $(2.0, 3.9)$ and, with BCF we estimate an 
+average treatment effect of 3.4 kilograms and a 95\% credible interval of $(2.5, 5.9)$.
+
+To explore the potential use of unlabeled data, we proceed by removing data at random from this dataset, estimating complete case and semi-supervised ATEs, and repeating the procedure 
+on many sub-samples of the data. Table 8 below reports the average treatment effects estimated at different levels of outcome missingness.
+These results highlight the same trends seen in our simulation studies. Using unlabeled data to estimate propensity scores generally improves the quality of our estimates, but having an 
+adequate sample of observed outcomes is crucial. 80\% of outcomes missing translates to roughly 300 observed outcomes, and we see that in this case the semi-supervised approach comes 
+much closer to approximating the full data ATE.
+
+\begin{table}[ht]
+\centering
+\begingroup\small
+\begin{tabular}{ccc}
+  \hline
+\% Outcomes Missing & Complete Case & Semi-Supervised \\ 
+  \hline
+80\% & 2.5 & 3.0 \\ 
+50\% & 2.8 & 3.0 \\ 
+20\% & 2.9 & 3.0 \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{IPW-BART Comparison of Complete Case and Semi-Supervised Approaches (200 sub-samples)} 
+\end{table}
+
+In running this experiment with the BCF estimator, we see that the difference between the semi-supervised and complete case approaches is virtually indistinguishable. 
+
+\begin{table}[ht]
+\centering
+\begingroup\small
+\begin{tabular}{ccccc}
+  \hline
+\% Outcomes Missing & Complete Case & Semi-Supervised \\ 
+  \hline
+80\% & 3.0 & 3.0 \\ 
+50\% & 3.3 & 3.4 \\ 
+20\% & 3.4 & 3.4 \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{BCF Comparison of Complete Case and Semi-Supervised Approaches (200 sub-samples)} 
+\end{table}
+
 \section{Discussion}
 
 \subsection{Theoretical motivation of semi-supervised propensity score results}
-
-%To see why using unlabeled data is, consider the 
 
 \subsection{Parallels to survey inference}
 
