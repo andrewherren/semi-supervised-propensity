@@ -11,9 +11,6 @@
 \usepackage[round]{natbib}
 \usepackage{enumerate}
 \linespread{1.5} 
-%\def\argmin{\operatornamewithlimits{arg\,min}}
-%\newcommand{\todonote}[1] {{\textcolor{red}{TODO: #1}}}
-%\DeclareMathOperator{\iid}{\stackrel{\mbox{\tiny iid} }{\sim}}
 \newcommand{\abs}[1] {|#1|}
 \newcommand{\logit}{\mbox{logit}}
 \newcommand{\B}{\mathbf{B}}
@@ -25,6 +22,7 @@
 \newcommand{\tepsilon}{\tilde{\epsilon}}
 \newcommand{\blambda}{\mathbf{\lambda}}
 \newcommand{\Z}{\mathbf{Z}}
+\newcommand{\Norm}{\mathcal{N}}
 \newcommand{\br}{\mathbf{r}}
 \newcommand{\bv}{\mathbf{b}}
 \newcommand{\f}{\mathbf{f}}
@@ -49,16 +47,6 @@
 \newcommand{\I}{\mathbf{I}}
 \newcommand{\Tau}{\mathrm{T}}
 \newcommand{\x}{\mathrm{x}}
-\newtheorem{theorem}{Theorem}[section]
-%\newtheorem{lemma}[theorem]{Lemma}
-%\newtheorem{proposition}[theorem]{Proposition}
-%\newtheorem{corollary}[theorem]{Corollary}
-%\newenvironment{definition}[1][Definition]{\begin{trivlist}
-%\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-%\newenvironment{example}[1][Example]{\begin{trivlist}
-%\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
-%\newenvironment{remark}[1][Remark]{\begin{trivlist}
-%\item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
 \newenvironment{example}[1][Example]{\begin{trivlist}
 \item[\hskip \labelsep {\bfseries #1}]}{\end{trivlist}}
 \newenvironment{remark}[1][Remark]{\begin{trivlist}
@@ -79,8 +67,8 @@
 We extend the notion of semi-supervised learning to causal inference by considering data as ``unlabeled"
 if treatment assignment and covariates are observed but outcomes are unobserved. 
 We demonstrate how to make use of unlabeled data in estimating the average treatment effect, 
-and validate the results using simulation studies.
- \end{abstract}
+and validate the results using simulation studies as well as public survey data.
+\end{abstract}
 
 %% keywords here, in the form: keyword \sep keyword
 \begin{keyword}
@@ -96,10 +84,10 @@ it can produce unbiased estimates of treatment effects when used with matching o
 Propensity score methods have been put to successful use in many domains, including economics (\cite{heckman1997matching}), 
 medicine (\cite{luo2010applying}), and political science (\cite{fong2018covariate}).
 
-We introduce a novel approach to treatment effect estimation for datasets with unlabeled treatment assignments 
-and covariates (that is, data points for which outcomes are not observed, but covariates and treatment status are observed). 
-With insight from the semi-supervised learning literature, we use the unlabeled data to learn a more accurate propensity 
-score model and then use the predicted propensity scores to estimate treatment effects among the labeled observations.
+We show that treatment effect estimates can be improved by using unlabeled treatment assignment 
+and covariate data (that is, data points for which outcomes are not observed, but covariates and treatment status are observed). 
+With insight from the semi-supervised learning literature, we use the unlabeled data to calculate more accurate propensity 
+scores and then use the predicted propensity scores to estimate treatment effects among the labeled observations.
 
 Much work has been done on propensity score methods in the general case of missing data. 
 \cite{d2000estimating} extend the ECM algorithm (\cite{meng1993maximum}) to learn propensity scores with missing covariates. 
@@ -114,13 +102,12 @@ The semi-supervised learning framework has been applied productively in the mach
 \cite{cheng2018efficient} propose a semi-supervised learning framework for estimating average treatment effects. 
 However, their method differs from our approach in several ways. 
 Most prominently, they aim to build a doubly robust estimator of the ATE, while our aim is to 
-learn propensity scores which can be used flexibly in a variety of estimators. Their method is also primarily characterized by 
-imputing missing outcomes, while we use the labeled outcomes to estimate the ATE and make use of the unlabeled 
-data solely to calculate propensity scores.
+learn propensity scores which can be used flexibly in a variety of estimators.
 
 \section{Problem statement and notation}
 
 \subsection{Notation}
+\label{subsection:notation}
 
 Consider a dataset with $n$ observations. Let $\Y$ denote the outcome of interest, which we assume to be only partially observed. 
 We refer to the data points with observed outcomes as ``labeled data," and let $n_o$ refer to the number of such labeled observations 
@@ -129,7 +116,7 @@ Let $\X$ denote covariates, which includes information that may predict treatmen
 In many applied settings, covariates include demographics, health markers, or various self-reported behaviors.
 $\Z$ refers to a binary treatment assignment. In a controlled experiment, the treatment assignment would be randomized according to a pre-specified design. 
 Observational studies are characterized by a lack of direct manipulation of treatment assignment. 
-Finally, an outcome's status as missing or observed is indexed by $\M$. Central to our method is the assumption that outcomes are only 
+Finally, an outcome's status as missing or observed is indexed by $\M$. Central to our approach is the assumption that outcomes are only 
 observed for a fraction of a given dataset.
 
 Following the notation of \cite{liang2007use}, we denote unlabeled, or marginal, data as
@@ -144,19 +131,20 @@ where $n_m$ denotes the number of unlabeled covariate data points. We observe th
 
 One common goal in causal inference with observational data is to recover an unbiased estimate of the average treatment effect (ATE). Following \cite{rosenbaum1983central}, 
 we define $\textrm{ATE} = \E_X[\E[Y | X, Z = 1] - \E[Y | X, Z = 0]]$ as the population expectation of the outcome for those who received treatment less the expected outcome for those who did 
-not receive treatment. The ATE can be estimated by a number of procedures. This paper will focus on several procedures which make use of estimated propensity scores.
+not receive treatment. We assume that $Z$ is exchangeable conditional on $X$. The ATE can be estimated by a number of procedures. This paper will focus on several 
+estimators which make use of estimated propensity scores.
 
-The first method we evaluate is the Inverse Propensity Weighted (IPW) estimator of the ATE (\cite{hirano2003efficient}, \cite{cerulli2014treatrew}), defined as
-\[ \widehat{\textrm{ATE}_{\textrm{IPW}}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( \frac{Y_i Z_i}{\hat{p_i}} - \frac{Y_i (1 - Z_i)}{(1 - \hat{p_i})} \right) \]
+The first method we evaluate is the Inverse Propensity Weighted (IPW) estimator of the ATE (\cite{hirano2003efficient}), defined as
+\[ \textrm{ATE}_{\textrm{IPW}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( \frac{Y_i Z_i}{\hat{p_i}} - \frac{Y_i (1 - Z_i)}{(1 - \hat{p_i})} \right) \]
 where the propensity score, $\hat{p_i} = \hat{p_i}(Z_i = z | X_i)$, is an estimate of the probability of receiving treatment conditional on covariates $X_i$ (\cite{rosenbaum1983central}).
 
 Next, we consider the targeted maximum likelihood estimator (TMLE) (\cite{van2010targeted}, \cite{van2010targeted2}, \cite{gruber2009targeted})
-\[\widehat{\textrm{ATE}_{\textrm{TMLE}}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( Q^*\left( Z_i = 1, X_i \right) - Q^*\left( Z_i = 0, X_i \right) \right)\]
+\[\textrm{ATE}_{\textrm{TMLE}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( Q^*\left( Z_i = 1, X_i \right) - Q^*\left( Z_i = 0, X_i \right) \right)\]
 where $Q^*\left( Z_i, X_i \right)$ represents a semi-parametric model of the outcome $Y$ which incorporates an estimate of the propensity model.
 
-Finally, we consider Bayesian causal forests (BCF) (\cite{hahn2017bayesian})
-\[\widehat{\textrm{ATE}_{\textrm{BCF}}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( f(X_i, Z_i = 1) - f(X_i, Z_i = 0) \right) \]
-where $f(X_i, Z_i)$ is a combination of two BART (\cite{chipman2010bart}) models, defined as $f(X_i, Z_i) = \mu(X_i, \hat{p_i}) + \tau(X_i) Z_i$ and $\hat{p_i}$ is an estimate of the propensity score.
+Finally, we consider Bayesian causal forests (BCF) (\cite{hahn2020bayesian})
+\[\textrm{ATE}_{\textrm{BCF}} = \frac{1}{n_o} \sum_{i = 1}^{n_o} \left( \bar{f}(X_i, Z_i = 1) - \bar{f}(X_i, Z_i = 0) \right) \]
+where $\bar{f}(X_i, Z_i)$ is an average of posterior simulations (across all simulations) of two BART (\cite{chipman2010bart}) models, defined as $f(X_i, Z_i) = \mu(X_i, \hat{p_i}) + \tau(X_i) Z_i$. $\hat{p_i}$ is an estimate of the propensity score.
 
 Each of these methods is evaluated according to three approaches:
 
@@ -175,7 +163,16 @@ methods, including CART (\cite{breiman1984classification}) and Random Forest (\c
 
 This paper proceeds similarly, but instead relies on Bayesian Additive Regression Trees (BART) (\cite{chipman2010bart}). 
 BART is a nonparametric Bayesian tree ensemble method that learns complex functions via a sum of weak regression 
-or classification trees. In the case of our IPW estimator, we also consider a propensity model specified using logistic regression in order to investigate how inferences can be harmed with a mis-specified propensity model.
+or classification trees. In the case of our IPW estimator, we also consider a propensity model specified using logistic regression 
+in order to investigate how inferences can be harmed with a mis-specified propensity model.
+
+We construct confidence intervals for our simulations as follows:
+
+\begin{itemize}
+	\item \textbf{IPW}: We compute the standard error for a logit propensity model as in \cite{cerulli2014treatrew}
+	\item \textbf{TMLE}: We use the 95\% confidence interval produced by the \texttt{tmle} R package
+	\item \textbf{BCF}: We construct a 95\% credible interval using posterior samples of the treatment effect 
+\end{itemize}
 
 \subsection{Evaluation metrics}
 
@@ -191,6 +188,7 @@ We will see that some estimators produce biased estimates of the ATE, others pro
 but attain poor interval coverage, and in some cases, both phenomena occur. 
 
 \subsection{Simulations}
+\label{section:simstudy}
 
 We first test our method using simulated data. We model a number of data generating processes, each of which is designed to 
 test the conditions under which propensity scores trained using unlabeled data are helpful or harmful to the ultimate
@@ -198,7 +196,7 @@ goal of estimating average treatment effects.
 
 \subsubsection{Data Generating Process}
 
-For simulated covariates, outcomes, and treatment effects, we use a subset of the data generating processes tested in \cite{hahn2017bayesian}. 
+For simulated covariates, outcomes, and treatment effects, we use a subset of the data generating processes tested in \cite{hahn2020bayesian}. 
 
 \begin{align*}
 Y &= \mu(X) + \tau Z + \varepsilon\\
@@ -214,7 +212,6 @@ x_5 &\sim \textrm{Categorical}(0.25, 0.5, 0.25)\\
 \tau &= 3\\
 \varepsilon &\sim \mathcal{N}(0, 1)\\
 \end{align*}
-
 There are $p = 5$ covariates, the first three of which are independent standard normal variables, the fourth of which is binary, 
 and the fifth is an unordered categorical variable with values $1, 2, 3$. Treatment effects are homogeneous ($\tau = 3$), and 
 the outcome is determined by a combination of treatment effects and a piecewise interaction function of three of the covariates
@@ -235,7 +232,7 @@ For treatment assignment, we consider two cases:
 \end{itemize}
 \end{enumerate}
 
-The second treatment assignment mechanism is described as ``Targeted Selection" in \cite{hahn2017bayesian}, and 
+The second treatment assignment mechanism is described as ``Targeted Selection" in \cite{hahn2020bayesian}, and 
 refers to the simple phenomenon of assigning treatment based on the expected value of the outcome for those who don't receive 
 treatment. This could be motivated quite simply as a physician's mental calculus of ``how much worse will these symptoms get if I don't 
 assign treatment."
@@ -247,7 +244,15 @@ may be helpful in estimating the ATE rather than treating our unobserved $Y^m$ a
 
 \subsubsection{Simulation results under targeted selection}
 
-We first examine the targeted selection scenario, in which treatment assignment is correlated with the 
+We first summarize the key takeaways from our simulations before proceeding to a more detailed discussion. 
+
+\begin{itemize}
+	\item Using unlabeled data will harm inferences in the case of a mis-specified propensity model, as confidence intervals are narrow around a biased estimate
+	\item BCF and IPW/BART both work best in the targeted selection scenario
+	\item While randomized treatment assignment makes ATE estimation much easier, unlabeled data can still be useful in this case for variance reduction purposes
+\end{itemize}
+
+We first examine the targeted selection case, in which treatment assignment is correlated with the 
 prognostic effect. The table below shows the results for 500 simulations using an IPW estimator and propensities 
 estimated by logistic regression. Logistic regression cannot capture the complexity of the simulated 
 treatment assignment in the targeted selected scenario, and we see that all of the results 
@@ -260,7 +265,6 @@ around a biased estimate, leading to poor interval coverage.
 The table below shows the results for 500 simulations using an IPW estimator and propensities 
 estimated by BART. In this case, the propensity model is not mis-specified, and we observe that 
 the use of unlabeled data reduces bias and increases interval coverage.
-\newpage
 
 \input{../../outputs/simulations_IPW_BART_LIN_HOM_MCAR_90.tex}
 
@@ -320,8 +324,8 @@ Have not quit smoking & 42.8 & 46.6 & 85.4 & 70.3 & 21.2 \\
 \caption{NHEFS - summary of covariates by treatment group} 
 \end{table}
 
-Given the two approaches which showed the strongest finite sample properties in simulation studies were IPW-BART and BCF, we use 
-both approaches to estimate the average effect on weight gain of quitting smoking.
+Given the two approaches which showed the strongest finite sample properties in our simulation studies were IPW-BART and BCF, we use 
+both methods to estimate the average effect on weight gain of quitting smoking.
 In each case, we use the same eleven potential confounders as covariates in a propensity model and estimate the overall ATE either via IPW or BCF.
 With IPW-BART, we estimate an average treatment effect of 3.0 kilograms with a 95\% confidence interval of $(2.0, 3.9)$ and, with BCF we estimate an 
 average treatment effect of 3.4 kilograms and a 95\% credible interval of $(2.5, 5.9)$.
@@ -369,6 +373,116 @@ In running this experiment with the BCF estimator, we see that the difference be
 \section{Discussion}
 
 \subsection{Theoretical motivation of semi-supervised propensity score results}
+\label{subsection:theoretical}
+
+To understand when and to what extent unlabeled data can be useful in estimating average treatment effects with propensity scores, we consider a theoretical example. 
+Let $Y$ be an outcome of interest, $X$ be a set of covariates, and $Z$ be treatment assignment. Following \cite{hernan2020causal}, we define the ATE according to: 
+$\E[Y | Z] = \theta_1 + \theta_2 Z$, where $\theta_2$ is the ATE estimand for a binary treatment variable $Z$. 
+We write the two parameters of this model as $\theta = [\theta_1, \textrm{ } \theta_2]$ and the matrix $U = [1, \textrm{ } Z]$ as the treatment assignments with a vector of 
+ones appended. Thus, we can formulate the conditional expected outcome as $\E[Y | Z] = U\theta$. 
+As \cite{hernan2020causal} note, as long as every individual has a non-zero probability of receiving treatment, the IPW estimator of the ATE is equivalent in expectation to 
+the weighted least squares estimator of $\theta_2$, given by the second element of the vector $\hat{\theta} = \left(U^TWU\right)^{-1}U^TWY$, where $W$ is a 
+diagonal matrix of weights computed from estimated propensity scores ($\hat{p}_i$) as follows:
+\begin{equation*}
+\begin{aligned}
+w_i & = 
+\begin{cases}
+\frac{1}{\hat{p}_i},&  Z_i = 1,\\
+\frac{1}{1 - \hat{p}_i},&  Z_i = 0,
+\end{cases} \\
+\end{aligned}
+\end{equation*}
+
+\cite{gelman2006data} point out that the weighted least squares estimator is the maximum likelihood estimator for 
+$\theta$ in the data model $Y_i \sim \Norm(Z_i\theta, \frac{\sigma^2}{w_i})$. Consider the following data generating process:
+
+\begin{equation*}
+\begin{aligned}
+X & \sim \Norm(0, \Sigma_1)\\
+\beta & \sim \Norm(0, \Sigma_2)\\
+\theta & \sim \Norm(0, \Sigma_3)\\
+p_i & = \left(\frac{1}{1+\exp(-X_i\beta)}\right)\\
+Z_i | p_i & \sim \textrm{Bernoulli}(p_i)\\
+w_i & = 
+\begin{cases}
+\frac{1}{p_i},&  Z_i = 1,\\
+\frac{1}{1 - p_i},&  Z_i = 0,
+\end{cases} \\
+Y_i | Z_i, \theta & \sim \Norm(Z_i\theta, \frac{\sigma^2}{w_i})\\
+\end{aligned}
+\end{equation*}
+
+As in Section \ref{subsection:notation}, we assume that, in addition to $Y$, $Z$, and $X$, we also have data $Z^m$ and $X^m$ for which no outcomes are observed. 
+We are interested in characterizing the posterior distribution $p(\theta, \beta | Y, Z, X)$ to determine whether information contained in $Z^m$ and $X^m$ will be helpful 
+in making inferences about $\theta$. We can see that 
+\begin{equation*}
+\begin{aligned}
+p(\theta, \beta | Y, Z, X) & \propto p(Y | Z, \theta, w, \sigma) p(Z | X, \beta) p(X | \Sigma_1) p(\theta | \Sigma_2) p(\beta | \Sigma_3)\\
+\end{aligned}
+\end{equation*}
+The unlabeled data enter this posterior via the propensity model $p(Z | X, \beta)$ and the covariate likelihood $p(X | \Sigma_1)$.
+We see that when the true propensities are unknown and must be estimated from the data, the marginal data $Z^m$ and $X^m$ are useful in inferring $\theta$. 
+This is driven by the fact that the weights in the outcome likelihood depend on $\beta$ which is learned from the labeled and unlabeled samples of ($X, Z$).
+
+However, when $p(Z | X, \beta) = p$ (i.e. $Z \perp X$) for some known value $p$, as in the case of a randomized experiment, the weights $w$ in the outcome 
+likelihood will be constant in $X$, so the posterior for $\theta$ does not depend on $\beta$.
+In this case, unlabeled data $Z^m$ and $X^m$ are irrelevant in making inferences about $\theta$, because $p(Y | Z, \theta, w, \sigma)$ is only informed by the known 
+probability $p$. This is also true of the more general case in which $Z \not\perp X$ but the true treatment probabilities are known for each value of $X$.
+
+\subsection{Estimated versus true propensities}
+\label{subsection:estimatedprop}
+
+In the above discussion, we assume that when the true propensities are known, they will be used in estimating the ATE. However, in certain cases, 
+it may be desirable to estimate propensity scores using $Z$ and $X$ even when the true propensities are known. \cite{lunceford2004stratification} show that the IPW estimator 
+with estimated propensities has a lower large sample variance than the same estimator using true propensities. On the surface, this result could be regarded as casting doubt on our 
+approach of using unlabeled data in treatment effect estimates. However, the analysis of \cite{lunceford2004stratification} only holds asymptotically. 
+It is certainly true in practice that the sample sizes required to obtain a low-variance treatment effect estimate depend on a number of factors such as the size of the treatment effect, 
+the noise level of the outcome variable, and the dimensionality of the covariates, so that one can never be sure an asymptotic result holds for their particular problem. 
+Indeed, our simulation results show that, for finite samples, using the true propensities (and more accurate estimates of the true propensities 
+using unlabeled data) can lead to reduced bias and greater interval coverage.
+
+Separately, \cite{imbens2015causal} point out that estimated propensities may achieve better covariate balance than true propensities. As with \cite{lunceford2004stratification}, 
+this result is not necessarily guaranteed or even expected to hold in practice and should serve primarily as a point of consideration for researchers. Any researcher with access to 
+marginal data on $Z$ and $X$ has the benefit of being able to weigh these considerations empirically. Covariate balance and standard errors can be assessed and directly compared 
+for the complete-case and semi-supervised propensity scores. While it is our general observation that, when marginal data is available, it is helpful in inferring average treatment effects, 
+we have seen in some of our simulations that including unlabeled data can be problematic. Researchers are advised to think carefully about their data and assumptions when 
+making modeling decisions.
+
+\subsection{Propensity model specification}
+\label{subsection:overfitprop}
+
+Though there may be benefits to using estimated propensity scores, in practice, calculating propensity scores introduces a new set of risks. The simulations in Section \ref{section:simstudy} 
+show that a mis-specified propensity model can bias estimates, sometimes drastically. It may seem natural, then, to treat a propensity model as any other supervised learning 
+problem, with variable selection, model validation, and diagnostics to ensure a proper fit. However, \cite{hernan2020causal} caution that traditional model selection techniques may 
+be of dubious utility in constructing propensity models. They note that the purpose of the propensity score is to construct an alternate population in which exchangeability is not 
+conditional on any of the measured covariates. They are careful to point out that a purely data-driven approach to model selection runs the risk of including variables, such as 
+colliders, mediators, or post-treatment variables, that jeopardize identification of treatment effects. They also advise that, even when treatment effects are identified, including 
+variables which are not confounders, but are strongly associated with treatment assignment, in a propensity model can increase the variance of treatment effect estimates 
+by pushing estimated propensity weights closer to 0 and 1.
+
+While it is certainly true that propensity models can be incorrect in ways that make estimation of treatment effects impossible or numerically unstable, a number of practical steps 
+can be taken to mitigate these concerns. First, estimated propensity scores should always be visualized or otherwise inspected to ensure that they are 
+not numerically close to 0 and 1. Second, methods like ridge regression or tree ensembles, which introduce some measure of regularization, can be used instead of logistic regression 
+to minimize the risk of estimating propensity scores close to 0 and 1. Finally, subject matter expertise should always play a role in propensity model building. However, we are aware that 
+for many applied problems, especially those with a high-dimensional covariate set, the challenge of constructing an accurate causal graph is highly non-trivial. Insofar as subject-matter 
+expertise can identify variables such as colliders, post-treatment variables, or non-confounders, such variables should of course be excluded from any propensity model. 
+Researchers who are concerned about an underlying causal graph invalidating their propensity model can also turn to the causal discovery literature (i.e. \cite{peters2017elements}). Specifically, 
+\cite{pmlr-v31-entner13a} present an approach to the problem of identifying confounders for adjustment in a causal model. In practice, the validity of assumptions about a causal graph 
+are often difficult to assess, and many researchers will have to assume that their study design (whether observational or experimental) is valid and be open about their assumptions. 
+
+\subsection{Connections to manifold learning theory}
+
+\cite{belkin2006manifold} demonstrate a technique for semi-supervised learning which learns a low-dimensional representation of the feature space and incorporates that representation 
+as a penalty term in a loss function. \cite{bickel2007local} show that a sufficiently flexible locally-weighted regression will tend to rely on the relevant dimensions of the feature space 
+without making any explicit effort to learn a representation of the low(er) dimensional space. While these results may appear contradictory, it is worth noting that they have slightly different goals. 
+\cite{bickel2007local} show that in a supervised learning problem, a low-dimensional representation does not need to be explicitly learned in order to be incorporated into a regression function. 
+Their approach does not provide any method for making use of unlabeled data, however, while \cite{belkin2006manifold} explicitly aim to introduce unlabeled data in their learning problem.
+
+The connection between propensity score methods and manifold learning is subtle. In manifold learning, the objective is to constrain a fitted function such that samples which are close 
+in the underlying manifold are also close in their predictions. In the context of treatment effect estimation, \cite{hahn2020bayesian} note that the propensity score can be viewed 
+as a one-dimensional representation of the feature space. Propensity scores could thus be considered as a constraint which ensures that samples which are close in the propensity space 
+will differ on average by treatment assignment and the associated causal effect. In either case, the key results of \cite{belkin2006manifold} show that, if a low dimensional representation is 
+desired for an estimation problem, using unlabeled data (from the same underlying distribution) can yield better estimates.
 
 \subsection{Parallels to survey inference}
 
@@ -385,12 +499,9 @@ practitioners will be forced to rely increasingly on non-probability surveys.
 The semi-supervised propensity score method extends quite naturally to non-probability survey estimation 
 by treating auxiliary data (from federal surveys, the Census Bureau, etc...) as ``unlabeled."
 
-\subsection{Further work}
+\subsection{Acknowledgments}
 
-\cite{belkin2006manifold} articulate a theory of semi-supervised learning which gives theoretical credence to the empirical observation 
-that unlabeled data can be helpful for supervised learning tasks. We hope to extend our work to include similar interpretations of the ATE using unlabeled data. Furthermore, we would like to extend the simulation results to include nonlinear prognostic functions, heterogeneous treatment 
-effects, and data that are not unlabeled completely at random.
-Finally, we would like to test this method on real world data, such as the National Health and Nutrition Examination Survey (NHANES). 
+This work was partially supported by NSF Award \#1502640.
 
 \bibliographystyle{imsart-nameyear} 
 \bibliography{semi-supervised-propensity}
