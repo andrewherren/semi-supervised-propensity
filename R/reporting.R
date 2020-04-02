@@ -63,7 +63,7 @@ simulation_estimates <- function(sim_num, df,
 ){
   # Allocate space for outputs
   row_num = 1
-  num_rows = 16
+  num_rows = 12
   simulation_result_output = data.frame(
     sim_num=rep(NA, num_rows), 
     estimator=rep("", num_rows), 
@@ -105,12 +105,12 @@ simulation_estimates <- function(sim_num, df,
   
   # Simple IPW estimator
   # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
+  # row_num = row_num + 1
+  # simulation_result_output[row_num, ] <- model_run(
+  #   sim_num, sample, lin, hom, missing_type, 
+  #   missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW", 
+  #   other_notes="True propensities", estimate_propensity = FALSE
+  # )
   
   # Simple IPW estimator
   # Complete case analysis
@@ -146,12 +146,12 @@ simulation_estimates <- function(sim_num, df,
   # Run TMLE estimator with BART for prognostic and 
   # propensity models
   # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "TMLE", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
+  # row_num = row_num + 1
+  # simulation_result_output[row_num, ] <- model_run(
+  #   sim_num, sample, lin, hom, missing_type, 
+  #   missing_pct, conf, type="ssl", alpha = 0.05, method = "TMLE", 
+  #   other_notes="True propensities", estimate_propensity = FALSE
+  # )
 
   # Run TMLE estimator with BART for prognostic and 
   # propensity models
@@ -186,12 +186,12 @@ simulation_estimates <- function(sim_num, df,
   # BCF estimator
   # Semi-supervised
   # True propensities
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "BCF", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
+  # row_num = row_num + 1
+  # simulation_result_output[row_num, ] <- model_run(
+  #   sim_num, sample, lin, hom, missing_type, 
+  #   missing_pct, conf, type="ssl", alpha = 0.05, method = "BCF", 
+  #   other_notes="True propensities", estimate_propensity = FALSE
+  # )
   
   # BCF estimator
   # Complete case
@@ -225,12 +225,12 @@ simulation_estimates <- function(sim_num, df,
   
   # IPW-BART estimator
   # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW_BART", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
+  # row_num = row_num + 1
+  # simulation_result_output[row_num, ] <- model_run(
+  #   sim_num, sample, lin, hom, missing_type, 
+  #   missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW_BART", 
+  #   other_notes="True propensities", estimate_propensity = FALSE
+  # )
   
   # IPW-BART estimator
   # Complete case analysis
@@ -241,195 +241,6 @@ simulation_estimates <- function(sim_num, df,
     other_notes="True propensities", estimate_propensity = FALSE
   )
 
-  return(simulation_result_output)
-}
-
-
-simulation_estimates_XBART <- function(sim_num, df, 
-                                 # Details about the DGP
-                                 sample = 5000, lin = "lin", hom = "hom", missing_type = "MCAR", 
-                                 missing_pct = "90", conf = "unconf"
-){
-  # Allocate space for outputs
-  row_num = 1
-  num_rows = 16
-  simulation_result_output = data.frame(
-    sim_num=rep(NA, num_rows), 
-    estimator=rep("", num_rows), 
-    method=rep("", num_rows), 
-    outcome=rep("", num_rows), 
-    effect_type=rep("", num_rows), 
-    unlabeled_mechanism=rep("", num_rows), 
-    pct_unlab=rep("", num_rows), 
-    confoundedness=rep("", num_rows), 
-    other_notes=rep("", num_rows), 
-    sample_size=rep(NA, num_rows), 
-    true_tau=rep(NA, num_rows), 
-    ATE=rep(NA, num_rows), 
-    ATE_CI_lb=rep(NA, num_rows), 
-    ATE_CI_ub=rep(NA, num_rows), 
-    rmse=rep(NA, num_rows), 
-    cover=rep(NA, num_rows), 
-    stringsAsFactors=FALSE
-  )
-  
-  ###############################################
-  # IPW-Linear
-  # Simple IPW estimator
-  # Semi-supervised case
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW", 
-    other_notes="", estimate_propensity = TRUE
-  )
-  
-  # Simple IPW estimator
-  # Complete case analysis
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="complete_case", alpha = 0.05, method = "IPW", 
-    other_notes="", estimate_propensity = TRUE
-  )
-  
-  # Simple IPW estimator
-  # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
-  
-  # Simple IPW estimator
-  # Complete case analysis
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="complete_case", alpha = 0.05, method = "IPW", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
-  
-  ###############################################
-  # TMLE
-  # Run TMLE estimator with BART for prognostic and 
-  # propensity models
-  # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "TMLE_XBART", 
-    other_notes="", estimate_propensity = TRUE
-  )
-  
-  # Run TMLE estimator with BART for prognostic and 
-  # propensity models
-  # Complete case analysis
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="complete_case", alpha = 0.05, method = "TMLE_XBART", 
-    other_notes="", estimate_propensity = TRUE
-  )
-  
-  # Run TMLE estimator with BART for prognostic and 
-  # propensity models
-  # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "TMLE_XBART", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
-  
-  # Run TMLE estimator with BART for prognostic and 
-  # propensity models
-  # Complete case analysis
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="complete_case", alpha = 0.05, method = "TMLE_XBART", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
-  
-  ###############################################
-  # BCF
-  # BCF estimator
-  # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "BCF_XBART", 
-    other_notes="", estimate_propensity = TRUE
-  )
-  
-  # BCF estimator
-  # Complete case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="complete_case", alpha = 0.05, method = "BCF_XBART", 
-    other_notes="", estimate_propensity = TRUE
-  )
-  
-  # BCF estimator
-  # Semi-supervised
-  # True propensities
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "BCF_XBART", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
-  
-  # BCF estimator
-  # Complete case
-  # True propensities
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="complete_case", alpha = 0.05, method = "BCF_XBART", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
-  
-  ###############################################
-  # IPW-BART
-  # IPW-BART estimator
-  # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW_XBART", 
-    other_notes="", estimate_propensity = TRUE
-  )
-  
-  # IPW-BART estimator
-  # Complete case analysis
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="complete_case", alpha = 0.05, method = "IPW_XBART", 
-    other_notes="", estimate_propensity = TRUE
-  )
-  
-  # IPW-BART estimator
-  # Semi-supervised case
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW_XBART", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
-  
-  # IPW-BART estimator
-  # Complete case analysis
-  row_num = row_num + 1
-  simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
-    missing_pct, conf, type="complete_case", alpha = 0.05, method = "IPW_XBART", 
-    other_notes="True propensities", estimate_propensity = FALSE
-  )
-  
   return(simulation_result_output)
 }
 

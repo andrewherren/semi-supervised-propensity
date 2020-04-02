@@ -1,6 +1,6 @@
-project_dir <- "~/Github/RTG-2019-2H"
-setwd(project_dir)
-source("R/simulation.R", local=FALSE, echo=TRUE)
+require(here)
+project_dir <- here()
+source(file.path(project_dir, "R", "simulation.R"), local=FALSE, echo=TRUE)
 set.seed(1234)
 n_sim = 500
 
@@ -120,6 +120,50 @@ for (i in 1:n_sim){
   # CASE 8
   n = 250; linear = TRUE; homogeneous = TRUE
   missing_mechanism = "MCAR"; missing_pct = 0.90
+  confounded = FALSE
+  save_simulations(n = n, linear = linear, 
+                   homogeneous = homogeneous, 
+                   missing_mechanism = missing_mechanism, 
+                   missing_pct = missing_pct, 
+                   confounded = confounded)
+  
+  ###########################################
+  # CASE 9
+  n = 5000; linear = TRUE; homogeneous = TRUE
+  missing_mechanism = "MCAR"; missing_pct = 0.98
+  confounded = TRUE
+  save_simulations(n = n, linear = linear, 
+                   homogeneous = homogeneous, 
+                   missing_mechanism = missing_mechanism, 
+                   missing_pct = missing_pct, 
+                   confounded = confounded)
+  
+  ###########################################
+  # CASE 10
+  n = 5000; linear = TRUE; homogeneous = TRUE
+  missing_mechanism = "MCAR"; missing_pct = 0.98
+  confounded = FALSE
+  save_simulations(n = n, linear = linear, 
+                   homogeneous = homogeneous, 
+                   missing_mechanism = missing_mechanism, 
+                   missing_pct = missing_pct, 
+                   confounded = confounded)
+  
+  ###########################################
+  # CASE 11
+  n = 5000; linear = TRUE; homogeneous = TRUE
+  missing_mechanism = "MCAR"; missing_pct = 0.99
+  confounded = TRUE
+  save_simulations(n = n, linear = linear, 
+                   homogeneous = homogeneous, 
+                   missing_mechanism = missing_mechanism, 
+                   missing_pct = missing_pct, 
+                   confounded = confounded)
+  
+  ###########################################
+  # CASE 12
+  n = 5000; linear = TRUE; homogeneous = TRUE
+  missing_mechanism = "MCAR"; missing_pct = 0.99
   confounded = FALSE
   save_simulations(n = n, linear = linear, 
                    homogeneous = homogeneous, 

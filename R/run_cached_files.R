@@ -1,5 +1,5 @@
 # ========================================================
-# Runner script for simulations and analysis
+# Runner script for cached simulated datasets
 # ========================================================
 
 ##########################################################
@@ -11,7 +11,6 @@ source(file.path(project_dir, "R", "simulation.R"), local=FALSE, echo=TRUE)
 source(file.path(project_dir, "R", "estimator.R"), local=FALSE, echo=TRUE)
 source(file.path(project_dir, "R", "reporting.R"), local=FALSE, echo=TRUE)
 source(file.path(project_dir, "R", "result_export.R"), local=FALSE, echo=TRUE)
-# source(file.path(project_dir, "R", "propensity_score.R"), local=FALSE, echo=TRUE)
 datestamp = format(Sys.time(), "%Y%m%d%H%M")
 logfile_name = file.path(project_dir, "log", paste0("R_batch_log_", datestamp, ".log"))
 output_file = file(logfile_name, "w")
@@ -20,10 +19,9 @@ output_file = file(logfile_name, "w")
 # Simulation initialization and loop code
 
 # Load cached datasets and run results
-n_methods = 16
+n_methods = 12
 n_sim = 500
 n_dgps = 6
-# n_columns = 15
 n_df = n_sim*n_dgps*n_methods
 
 # Create outputs file to store results
@@ -80,11 +78,71 @@ for (i in 1:n_sim){
     i, df, sample, lin, hom, missing_type, missing_pct, conf
   )
   
+  # ##########################################################
+  # # Third DGP
+  # dgp_num = 3; startrow = 1 + endrow; endrow = endrow + n_methods
+  # sample = 1000; lin = "lin"; hom = "hom"
+  # missing_type = "MCAR"; missing_pct = "90"; conf = "unconf"
+  # subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
+  # file_name = paste0("df", i, ".csv")
+  # data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
+  # df <- read.csv(data_file)
+  # 
+  # # Run all estimates on the DGP loaded into memory
+  # output_df[startrow:endrow, ] <- simulation_estimates(
+  #   i, df, sample, lin, hom, missing_type, missing_pct, conf
+  # )
+  # 
+  # ##########################################################
+  # # Fourth DGP
+  # dgp_num = 4; startrow = 1 + endrow; endrow = endrow + n_methods
+  # sample = 1000; lin = "lin"; hom = "hom"
+  # missing_type = "MCAR"; missing_pct = "90"; conf = "conf"
+  # subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
+  # file_name = paste0("df", i, ".csv")
+  # data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
+  # df <- read.csv(data_file)
+  # 
+  # # Run all estimates on the DGP loaded into memory
+  # output_df[startrow:endrow, ] <- simulation_estimates(
+  #   i, df, sample, lin, hom, missing_type, missing_pct, conf
+  # )
+  # 
+  # ##########################################################
+  # # Fifth DGP
+  # dgp_num = 5; startrow = 1 + endrow; endrow = endrow + n_methods
+  # sample = 500; lin = "lin"; hom = "hom"
+  # missing_type = "MCAR"; missing_pct = "90"; conf = "unconf"
+  # subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
+  # file_name = paste0("df", i, ".csv")
+  # data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
+  # df <- read.csv(data_file)
+  # 
+  # # Run all estimates on the DGP loaded into memory
+  # output_df[startrow:endrow, ] <- simulation_estimates(
+  #   i, df, sample, lin, hom, missing_type, missing_pct, conf
+  # )
+  # 
+  # ##########################################################
+  # # Sixth DGP
+  # dgp_num = 6; startrow = 1 + endrow; endrow = endrow + n_methods
+  # sample = 500; lin = "lin"; hom = "hom"
+  # missing_type = "MCAR"; missing_pct = "90"; conf = "conf"
+  # subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
+  # file_name = paste0("df", i, ".csv")
+  # data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
+  # df <- read.csv(data_file)
+  # 
+  # # Run all estimates on the DGP loaded into memory
+  # output_df[startrow:endrow, ] <- simulation_estimates(
+  #   i, df, sample, lin, hom, missing_type, missing_pct, conf
+  # )
+  
   ##########################################################
   # Third DGP
   dgp_num = 3; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 1000; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "90"; conf = "unconf"
+  sample = 5000; lin = "lin"; hom = "hom"
+  missing_type = "MCAR"; missing_pct = "98"; conf = "unconf"
   subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
   file_name = paste0("df", i, ".csv")
   data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
@@ -98,8 +156,8 @@ for (i in 1:n_sim){
   ##########################################################
   # Fourth DGP
   dgp_num = 4; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 1000; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "90"; conf = "conf"
+  sample = 5000; lin = "lin"; hom = "hom"
+  missing_type = "MCAR"; missing_pct = "98"; conf = "conf"
   subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
   file_name = paste0("df", i, ".csv")
   data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
@@ -113,8 +171,8 @@ for (i in 1:n_sim){
   ##########################################################
   # Fifth DGP
   dgp_num = 5; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 500; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "90"; conf = "unconf"
+  sample = 5000; lin = "lin"; hom = "hom"
+  missing_type = "MCAR"; missing_pct = "99"; conf = "unconf"
   subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
   file_name = paste0("df", i, ".csv")
   data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
@@ -128,8 +186,8 @@ for (i in 1:n_sim){
   ##########################################################
   # Sixth DGP
   dgp_num = 6; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 500; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "90"; conf = "conf"
+  sample = 5000; lin = "lin"; hom = "hom"
+  missing_type = "MCAR"; missing_pct = "99"; conf = "conf"
   subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
   file_name = paste0("df", i, ".csv")
   data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
@@ -144,7 +202,6 @@ for (i in 1:n_sim){
   cat("==================================================\n", file = output_file)
   cat(paste("Run time:", t, "\n"), file = output_file)
   cat(paste("Sim", i, "of", n_sim, "complete\n\n"), file = output_file)
-  # cat("Sim", i, "of", n_sim, "complete\n")
 }
 close(output_file)
 

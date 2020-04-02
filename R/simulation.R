@@ -47,7 +47,9 @@ bcf_simulations <- function(n = 250, linear = TRUE, homogeneous = TRUE,
   if (missing_mechanism=="None") {
     M = rep(0, n)
   } else if (missing_mechanism=="MCAR"){
-    M = rbinom(n, 1, missing_pct)
+    # M = rbinom(n, 1, missing_pct)
+    n_sample = floor((1-missing_pct)*n)
+    M = sample(c(rep(1,n_sample),rep(0,n-n_sample)))
   } else if (missing_mechanism=="linear"){
     # Designed to make missingness correlated with x_2
     # and have a total % unlabeled of roughly 90%
