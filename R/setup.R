@@ -10,7 +10,8 @@
 pkg.list <- c("bcf", "grf", "ranger", "survey", "stats", "dplyr", "magrittr",
               "assertthat", "testthat", "quantreg", "MASS", "CausalGAM", 
               "KernSmooth", "sampling", "lavaan.survey", "tmle", "sandwich", 
-              "Matching", "glmnet", "dbarts", "XBART", "xtable", "here")
+              "Matching", "glmnet", "dbarts", "XBART", "xtable", "here", 
+              "foreach", "doParallel")
 # install.packages(pkg.list)
 lapply(pkg.list, require, character.only = TRUE)
 

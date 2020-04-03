@@ -11,7 +11,7 @@ create_simulation_row <- function(
 }
 
 model_run <- function(
-  sim_num, sample = 5000, lin = "lin", hom = "hom", 
+  sim_num, df, sample = 5000, lin = "lin", hom = "hom", 
   missing_type = "MCAR", missing_pct = "90", conf = "unconf", 
   type="ssl", alpha = 0.05, method = "IPW", other_notes, 
   estimate_propensity = TRUE
@@ -89,7 +89,7 @@ simulation_estimates <- function(sim_num, df,
   # Simple IPW estimator
   # Semi-supervised case
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW", 
     other_notes="", estimate_propensity = TRUE
   )
@@ -98,7 +98,7 @@ simulation_estimates <- function(sim_num, df,
   # Complete case analysis
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="complete_case", alpha = 0.05, method = "IPW", 
     other_notes="", estimate_propensity = TRUE
   )
@@ -107,7 +107,7 @@ simulation_estimates <- function(sim_num, df,
   # Semi-supervised case
   # row_num = row_num + 1
   # simulation_result_output[row_num, ] <- model_run(
-  #   sim_num, sample, lin, hom, missing_type, 
+  #   sim_num, df, sample, lin, hom, missing_type, 
   #   missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW", 
   #   other_notes="True propensities", estimate_propensity = FALSE
   # )
@@ -116,7 +116,7 @@ simulation_estimates <- function(sim_num, df,
   # Complete case analysis
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="complete_case", alpha = 0.05, method = "IPW", 
     other_notes="True propensities", estimate_propensity = FALSE
   )
@@ -128,7 +128,7 @@ simulation_estimates <- function(sim_num, df,
   # Semi-supervised case
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="ssl", alpha = 0.05, method = "TMLE", 
     other_notes="", estimate_propensity = TRUE
   )
@@ -138,7 +138,7 @@ simulation_estimates <- function(sim_num, df,
   # Complete case analysis
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="complete_case", alpha = 0.05, method = "TMLE", 
     other_notes="", estimate_propensity = TRUE
   )
@@ -148,7 +148,7 @@ simulation_estimates <- function(sim_num, df,
   # Semi-supervised case
   # row_num = row_num + 1
   # simulation_result_output[row_num, ] <- model_run(
-  #   sim_num, sample, lin, hom, missing_type, 
+  #   sim_num, df, sample, lin, hom, missing_type, 
   #   missing_pct, conf, type="ssl", alpha = 0.05, method = "TMLE", 
   #   other_notes="True propensities", estimate_propensity = FALSE
   # )
@@ -158,7 +158,7 @@ simulation_estimates <- function(sim_num, df,
   # Complete case analysis
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="complete_case", alpha = 0.05, method = "TMLE", 
     other_notes="True propensities", estimate_propensity = FALSE
   )
@@ -169,7 +169,7 @@ simulation_estimates <- function(sim_num, df,
   # Semi-supervised case
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="ssl", alpha = 0.05, method = "BCF", 
     other_notes="", estimate_propensity = TRUE
   )
@@ -178,7 +178,7 @@ simulation_estimates <- function(sim_num, df,
   # Complete case
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="complete_case", alpha = 0.05, method = "BCF", 
     other_notes="", estimate_propensity = TRUE
   )
@@ -188,7 +188,7 @@ simulation_estimates <- function(sim_num, df,
   # True propensities
   # row_num = row_num + 1
   # simulation_result_output[row_num, ] <- model_run(
-  #   sim_num, sample, lin, hom, missing_type, 
+  #   sim_num, df, sample, lin, hom, missing_type, 
   #   missing_pct, conf, type="ssl", alpha = 0.05, method = "BCF", 
   #   other_notes="True propensities", estimate_propensity = FALSE
   # )
@@ -198,7 +198,7 @@ simulation_estimates <- function(sim_num, df,
   # True propensities
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="complete_case", alpha = 0.05, method = "BCF", 
     other_notes="True propensities", estimate_propensity = FALSE
   )
@@ -209,7 +209,7 @@ simulation_estimates <- function(sim_num, df,
   # Semi-supervised case
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW_BART", 
     other_notes="", estimate_propensity = TRUE
   )
@@ -218,7 +218,7 @@ simulation_estimates <- function(sim_num, df,
   # Complete case analysis
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="complete_case", alpha = 0.05, method = "IPW_BART", 
     other_notes="", estimate_propensity = TRUE
   )
@@ -227,7 +227,7 @@ simulation_estimates <- function(sim_num, df,
   # Semi-supervised case
   # row_num = row_num + 1
   # simulation_result_output[row_num, ] <- model_run(
-  #   sim_num, sample, lin, hom, missing_type, 
+  #   sim_num, df, sample, lin, hom, missing_type, 
   #   missing_pct, conf, type="ssl", alpha = 0.05, method = "IPW_BART", 
   #   other_notes="True propensities", estimate_propensity = FALSE
   # )
@@ -236,7 +236,7 @@ simulation_estimates <- function(sim_num, df,
   # Complete case analysis
   row_num = row_num + 1
   simulation_result_output[row_num, ] <- model_run(
-    sim_num, sample, lin, hom, missing_type, 
+    sim_num, df, sample, lin, hom, missing_type, 
     missing_pct, conf, type="complete_case", alpha = 0.05, method = "IPW_BART", 
     other_notes="True propensities", estimate_propensity = FALSE
   )
