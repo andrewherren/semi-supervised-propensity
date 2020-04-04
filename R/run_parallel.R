@@ -33,8 +33,21 @@ DGP.list <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Methods
+method.list <- data.frame(
+  data_usage = c("ssl", "complete_case", "complete_case", "ssl", "complete_case", "complete_case", "ssl", "complete_case", "complete_case", "ssl", "complete_case", "complete_case"),
+  alpha = c(0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05),
+  estimation_method = c("IPW", "IPW", "IPW", "TMLE", "TMLE", "TMLE", "BCF", "BCF", "BCF", "IPW_BART", "IPW_BART", "IPW_BART"),
+  other_notes = c("", "", "True propensities", "", "", "True propensities", "", "", "True propensities", "", "", "True propensities"),
+  estimate_propensity = c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE),
+  stringsAsFactors = FALSE
+)
+
+# Parallelization control frame
+par.list <- merge(DGP.list, method.list, all = TRUE)
+
 # Create outputs file to store results
-n_methods = 12
+n_methods = nrow(method.list)
 n_sim = 1
 n_dgps = nrow(DGP.list)
 n_df = n_sim*n_dgps*n_methods
