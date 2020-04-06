@@ -210,7 +210,7 @@ x_1, x_2, x_3 &\sim \mathcal{N}(0, 1)\\
 x_4 &\sim \textrm{Bernoulli}(0.5)\\
 x_5 &\sim \textrm{Categorical}(0.25, 0.5, 0.25)\\
 \tau &= 3\\
-\varepsilon &\sim \mathcal{N}(0, 1)\\
+\varepsilon &\sim \mathcal{N}(0, 1)
 \end{align*}
 There are $p = 5$ covariates, the first three of which are independent standard normal variables, the fourth of which is binary, 
 and the fifth is an unordered categorical variable with values $1, 2, 3$. Treatment effects are homogeneous ($\tau = 3$), and 
@@ -370,6 +370,7 @@ In running this experiment with the BCF estimator, we see that the difference be
 \caption{BCF Comparison of Complete Case and Semi-Supervised Approaches (200 sub-samples)} 
 \end{table}
 
+\newpage
 \section{Discussion}
 
 \subsection{Theoretical motivation of semi-supervised propensity score results}
@@ -432,28 +433,64 @@ probability $p$. This is also true of the more general case in which $Z \not\per
 \subsection{Estimated versus true propensities}
 \label{subsection:estimatedprop}
 
-In the above discussion, we assume that when the true propensities are known, they will be used in estimating the ATE. However, in certain cases, 
-it may be desirable to estimate propensity scores using $Z$ and $X$ even when the true propensities are known. \cite{lunceford2004stratification} show that the IPW estimator 
-with estimated propensities has a lower large sample variance than the same estimator using true propensities. On the surface, this result could be regarded as casting doubt on our 
-approach of using unlabeled data in treatment effect estimates. However, the analysis of \cite{lunceford2004stratification} only holds asymptotically. 
-It is certainly true in practice that the sample sizes required to obtain a low-variance treatment effect estimate depend on a number of factors such as the size of the treatment effect, 
-the noise level of the outcome variable, and the dimensionality of the covariates, so that one can never be sure an asymptotic result holds for their particular problem. 
-Indeed, our simulation results show that, for finite samples, using the true propensities (and more accurate estimates of the true propensities 
-using unlabeled data) can lead to reduced bias and greater interval coverage.
+A recurrent theme in the causal inference literature is that treatment effect estimators which rely on fitted propensities attain a lower variance than estimators that 
+rely on known, true propensities. Taken at face value, this point would appear to invalidate our recommendation to use unlabeled data in treatment effect estimation. 
+Why use unlabeled data to better approximate the true propensities, when the estimated propensities lead to superior inference? 
+What appears at first glance as a conflict between our approach and the received statistical wisdom masks a series of interesting and subtle points. We feel that this topic 
+deserves a more detailed and consolidated elucidation, which we present in the following section.
 
-Separately, \cite{imbens2015causal} point out that estimated propensities may achieve better covariate balance than true propensities. As with \cite{lunceford2004stratification}, 
-this result is not necessarily guaranteed or even expected to hold in practice and should serve primarily as a point of consideration for researchers. Any researcher with access to 
-marginal data on $Z$ and $X$ has the benefit of being able to weigh these considerations empirically. Covariate balance and standard errors can be assessed and directly compared 
-for the complete-case and semi-supervised propensity scores. While it is our general observation that, when marginal data is available, it is helpful in inferring average treatment effects, 
-we have seen in some of our simulations that including unlabeled data can be problematic. Researchers are advised to think carefully about their data and assumptions when 
-making modeling decisions.
+\cite{rosenbaum1987model} provides the first detailed treatment of this question in the context of estimating population outcomes from sample data. 
+Consider a population of interest in which each of $S$ strata have (possibly different) probabilities of selection. He compares three estimators of a population outcome:
+\begin{enumerate}
+\item Empirical postratification: each stratum is weighted by its proportion of sampled units
+\item Model-based postratification: each stratum is weighted by a parametric estimate of its sampling probability
+\item Known weight postratification: each stratum is weighted by its known sampling probability
+\end{enumerate} 
+He shows that, conditional on the observed sample, estimators 1 and 2 are unbiased, but 3 is biased. Citing \cite{holt1979post}, he notes that post-stratification estimators 
+which are unbiased conditional on an observed sample are preferable.
+
+\cite{imbens1996efficient} develop an efficient estimator for stratified sampling data which necessitates a moment constraint on the selection probability less the observed 
+selection variable. When the true selection probabilities are known, they note that this approach is similar in nature to the Seemingly Unrelated Regression (SUR) 
+(\cite{zellner1963estimators}), in which models fit simultaneously can experience efficiency gains even when there are no common parameters. 
+\cite{hirano2003efficient} also show that estimators which use the true propensities can attain the efficiency bound by incorporating additional moment constraints on 
+the selection (or treatment) variable, covariates, and the true propensities. \cite{lunceford2004stratification} demonstrate that the IPW estimator 
+with estimated propensities has a lower large sample variance than the same estimator using true propensities. 
+
+To address these points and reconcile them to our approach, we note first and foremost that the results are primarily concerned with the asymptotic behavior of estimators. 
+It is certainly true in practice that the sample sizes required to obtain a minimum-variance treatment effect estimate depends on a number of factors, so that one can never 
+be sure an asymptotic result holds for their particular problem. 
+Indeed, our simulation results show that, for finite samples, using the true propensities (or more accurate estimates of the true propensities using unlabeled data) can lead 
+to reduced bias and greater interval coverage. Put differently, without enough data to attain asymptotic results, the risk of bias greatly outweighs the risk of inefficiency.
+
+Second, we note that the results apply to weighting, stratification, and matching estimators. There are many practical alternatives to these methods, such as 
+BCF, which do not exhibit this behavior. Third, this phenomenon depends entirely upon being able to construct a propensity model that is an unbiased estimate of the true 
+propensities. Any amount of mis-specification (discussed the next section) will completely invalidate the efficiency gains by yielding a biased estimate of the average 
+treatment effect.
+
+Finally, we demonstrate a modification to the weighting estimator which uses the true propensities and attains a lower variance than the fitted-propensity estimator.
+Consider $X$, $Z$, and $Y$ as covariates, treatment assignment, and outcome, and $p$ as the true probability of receiving treatment. Inverting the logit function, we transform the true 
+propensities into $h = - \log(\frac{1}{p} - 1)$ and fit a logistic regression of $Z$ on $h$. Using the predicted probabilities from this regression model as weights in an IPW estimator, 
+we see in simulation studies that this method attains the lowest variance among three alternatives:
+\begin{enumerate}
+\item True propensities as weights
+\item Estimated propensities as weights
+\item Modified true propensities as weights
+\end{enumerate} 
+
+In summary, we advise researchers who have access to true propensities, or a set of unlabeled data that will help in approximating the true propensities, to use that data in 
+estimating treatment effects. Researchers who wish to use a weighting estimator can simply modify the true propensities to reduce the variance of their estimates, and researchers 
+using more flexible techniques such as BCF should not worry about this result in any case.
 
 \subsection{Propensity model specification}
 \label{subsection:overfitprop}
 
 Though there may be benefits to using estimated propensity scores, in practice, calculating propensity scores introduces a new set of risks. The simulations in Section \ref{section:simstudy} 
-show that a mis-specified propensity model can bias estimates, sometimes drastically. It may seem natural, then, to treat a propensity model as any other supervised learning 
-problem, with variable selection, model validation, and diagnostics to ensure a proper fit. However, \cite{hernan2020causal} caution that traditional model selection techniques may 
+show that a misspecified propensity model can bias estimates, sometimes drastically. It may seem natural, then, to treat a propensity model as any other supervised learning 
+problem, with variable selection, model validation, and diagnostics to ensure a proper fit. 
+Indeed, \cite{mccaffrey2004propensity} use generalized boosted models (GBM) to estimate propensities, in part for the automatic variable selection and flexible model specification that 
+tree ensembles provide. Their results show that using GBM for a propensity model leads to better covariate balance and lower standard errors than a logit propensity model.
+
+However, \cite{hernan2020causal} caution that traditional model selection techniques may 
 be of dubious utility in constructing propensity models. They note that the purpose of the propensity score is to construct an alternate population in which exchangeability is not 
 conditional on any of the measured covariates. They are careful to point out that a purely data-driven approach to model selection runs the risk of including variables, such as 
 colliders, mediators, or post-treatment variables, that jeopardize identification of treatment effects. They also advise that, even when treatment effects are identified, including 
@@ -463,12 +500,87 @@ by pushing estimated propensity weights closer to 0 and 1.
 While it is certainly true that propensity models can be incorrect in ways that make estimation of treatment effects impossible or numerically unstable, a number of practical steps 
 can be taken to mitigate these concerns. First, estimated propensity scores should always be visualized or otherwise inspected to ensure that they are 
 not numerically close to 0 and 1. Second, methods like ridge regression or tree ensembles, which introduce some measure of regularization, can be used instead of logistic regression 
-to minimize the risk of estimating propensity scores close to 0 and 1. Finally, subject matter expertise should always play a role in propensity model building. However, we are aware that 
+to minimize the risk of estimating propensity scores close to 0 and 1. Finally, subject matter expertise should always play a role in building propensity models. However, we are aware that 
 for many applied problems, especially those with a high-dimensional covariate set, the challenge of constructing an accurate causal graph is highly non-trivial. Insofar as subject-matter 
 expertise can identify variables such as colliders, post-treatment variables, or non-confounders, such variables should of course be excluded from any propensity model. 
 Researchers who are concerned about an underlying causal graph invalidating their propensity model can also turn to the causal discovery literature (i.e. \cite{peters2017elements}). Specifically, 
 \cite{pmlr-v31-entner13a} present an approach to the problem of identifying confounders for adjustment in a causal model. In practice, the validity of assumptions about a causal graph 
 are often difficult to assess, and many researchers will have to assume that their study design (whether observational or experimental) is valid and be open about their assumptions. 
+
+In order to better understand the risk of including non-confounders in a propensity model, we test several possibilities in a simulation study. Letting $X_j$ be a variable in a set of $p$ covariates, 
+we consider four cases:
+\begin{enumerate}[a)]
+\item \textbf{Case 1}: $X_j$ is a confounder and is included in a propensity model
+\item \textbf{Case 2}: $X_j$ is \underline{\textbf{not}} a confounder and is included in a propensity model  
+\item \textbf{Case 3}: $X_j$ is a confounder and is \underline{\textbf{not}} included in a propensity model
+\item \textbf{Case 4}: $X_j$ is \underline{\textbf{not}} a confounder and is \underline{\textbf{not}} included in a propensity model
+\end{enumerate}
+Cases 1 and 4 are ideal, while cases 2 and 3 both fail to properly account for the true underlying causal model. The question we are concerned with is whether erring on the side 
+of including non-confounders in a propensity model is as harmful to inference as ignoring true confounders. To do this, we simulate 100 datasets of $n = $1,000 from the following data generating process:
+\begin{align*}
+Y &= X\beta + \tau Z + \varepsilon\\
+X, \varepsilon &\sim \mathcal{N}(0, 1)\\
+\tau &= 3\\
+p & = \left(\frac{1}{1+\exp(-X\gamma)}\right)\\
+Z & \sim \textrm{Bernoulli}(p)
+\end{align*}
+For all variables except $X_j$, the $\beta$ and $\gamma$ coefficients for the outcome and propensity models are drawn uniformly at random from a range of $(-0.5, 0.5)$ and $(-0.3, 0.3)$, 
+respectively. For the scenarios in which $X_j$ is a confounder (that is, $X_j$ impacts both $Y$ and $Z$), we set $\beta_{X_j} = 0.5$.
+Each of our simulations assume some relationship between $X_j$ and $Z$, and we vary $\gamma_{X_j}$ between $\{0, 1, 10\}$ to test the extent to which conditioning on $X_j$ in a 
+propensity model separates the treatment and control groups.
+
+Below we see the simulated bias, RMSE, and 95\% interval coverage of each of the four cases, using BCF with a BART propensity model and $\gamma_{X_j} = 1$
+
+\begin{table}[ht]
+\centering
+\begingroup\small
+\begin{tabular}{cccccc}
+  \hline
+Case & $X_j$ confounder? & $X_j$ in $\hat{p}$? & Bias & RMSE & Coverage \\ 
+  \hline
+1 & Yes & Yes & 0.004 & 0.098 & 89\% \\ 
+2 & No & Yes & -0.008 & 0.096 & 88\% \\ 
+3 & Yes & No & 0.068 & 0.109 & 84\% \\ 
+4 & No & No & -0.007 & 0.087 & 87\% \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{ATE estimation using BCF, $\gamma_{X_j} = 1$} 
+\end{table}
+We see little difference in the results across each of the cases, because the influence of $X_j$ on $Y$ is modest in the confounded case. 
+Below is the same set of outputs for $\gamma_{X_j} = 10$.
+
+\begin{table}[ht]
+\centering
+\begingroup\small
+\begin{tabular}{cccccc}
+  \hline
+Case & $X_j$ confounder? & $X_j$ in $\hat{p}$? & Bias & RMSE & Coverage \\ 
+  \hline
+1 & Yes & Yes & 0.033 & 0.253 & 91\% \\ 
+2 & No & Yes & -0.09 & 0.262 & 87\% \\ 
+3 & Yes & No & 0.24 & 0.252 & 80\% \\ 
+4 & No & No & -0.045 & 0.126 & 98\% \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{ATE estimation using BCF, $\gamma_{X_j} = 10$} 
+\end{table}
+
+We see that cases 1 and 4 exhibit the best performance (since they properly incorporate the true 
+causal graph), but even when $X_j$ and $Z$ are strongly related, conditioning on $X_j$ in a propensity mode 
+when $X_j$ is not a confounder is less harmful than excluding $X_j$ when it is a confounder. 
+To understand why, we briefly review the discussion of ``regularization-induced confounding" (RIC) covered in \cite{hahn2020bayesian}.
+
+As we have seen in our simulations, classic parametric models of a treatment assignment are vulnerable to 
+misspecification. While this shortcoming suggests the use of flexible machine learning methods to estimate propensity scores, such methods run the risk of overfitting the data and estimating propensities close to 0 or 1. 
+In addition to numeric instability of common ATE estimators, such overfitting can also violate conditional exchangeability. 
+Researchers who want to fit flexible propensity models while avoiding overfitting can use regularized machine learning methods, such as BART. \cite{hahn2020bayesian}, building on \cite{hahn2018regularization}, show that a naive regularized model can bias treatment effect estimates. 
+Their proposed solution, BCF, controls this bias by incorporating the estimated propensities as a feature in a regression model predicting $\E(Y \mid Z = 0, \hat{p}, x)$.
+
+In our case, since the simulation studies above are conducted using BCF with a BART propensity model, we avoid the problem of an overfit propensity model separating treated and control groups while also recovering unbiased estimates of the average treatment effect. 
+This explains why including a non-confounder, $X_j$, which is strongly predictive of $Z$ in the propensity model doesn't harm inference of the ATE by nearly as much as excluding $X_j$ when it is a 
+confounder. 
 
 \subsection{Connections to manifold learning theory}
 
