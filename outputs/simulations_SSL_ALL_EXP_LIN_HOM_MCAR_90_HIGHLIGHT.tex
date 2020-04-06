@@ -1,0 +1,26 @@
+% latex table generated in R 3.6.2 by xtable 1.8-4 package
+% Sat Apr  4 06:53:31 2020
+\begin{table}[ht]
+\centering
+\begingroup\small
+\begin{tabular}{lllcc>{\columncolor[gray]{.9}}c>{\columncolor[gray]{.9}}c}
+  \hline
+Estimator & N & \# labeled & ATE & RMSE & Bias & Coverage \\ 
+  \hline
+  IPW (logistic) & 5,000 &  50 & 3.00 & 0.65 & -0.00 & 0.90 \\ 
+  IPW (logistic) & 5,000 & 100 & 3.00 & 0.47 & -0.00 & 0.93 \\ 
+  IPW (logistic) & 5,000 & 500 & 3.00 & 0.20 & 0.00 & 0.97 \\ 
+  IPW (BART) & 5,000 &  50 & 2.97 & 0.65 & -0.03 & 0.91 \\ 
+  IPW (BART) & 5,000 & 100 & 2.97 & 0.47 & -0.03 & 0.93 \\ 
+  IPW (BART) & 5,000 & 500 & 2.98 & 0.20 & -0.02 & 0.96 \\ 
+  TMLE & 5,000 &  50 & 2.95 & 0.33 & -0.05 & 0.76 \\ 
+  TMLE & 5,000 & 100 & 2.96 & 0.20 & -0.04 & 0.81 \\ 
+  TMLE & 5,000 & 500 & 3.00 & 0.08 & 0.00 & 0.87 \\ 
+  BCF & 5,000 &  50 & 2.91 & 0.70 & -0.09 & 0.82 \\ 
+  BCF & 5,000 & 100 & 2.94 & 0.46 & -0.06 & 0.90 \\ 
+  BCF & 5,000 & 500 & 2.99 & 0.22 & -0.01 & 0.97 \\ 
+   \hline
+\end{tabular}
+\endgroup
+\caption{500 simulations with outcomes MCAR} 
+\end{table}
