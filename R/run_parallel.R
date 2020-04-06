@@ -1,5 +1,5 @@
 # ========================================================
-# Runner script for cached simulated datasets
+# Runner script for parallel simulations
 # ========================================================
 
 ##########################################################
@@ -18,15 +18,39 @@ output_file = file(logfile_name, "w")
 ##########################################################
 # Simulation initialization and loop code
 
-# Load cached datasets and run results
-n_methods = 12
-n_sim = 500
-n_dgps = 6
-n_df = n_sim*n_dgps*n_methods
+# Create new "snapshots" folder, if doesn't exist
+snapshots_subfolder = file.path(project_dir, "outputs", "snapshots", datestamp)
+ifelse(!dir.exists(snapshots_subfolder), dir.create(snapshots_subfolder), FALSE)
+
+# Simulation DGPs
+DGP.list <- data.frame(
+  sample = c(5000, 5000, 5000, 5000, 5000, 5000),
+  lin = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  hom = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE),
+  missing_type = c("MCAR", "MCAR", "MCAR", "MCAR", "MCAR", "MCAR"),
+  missing_pct = c(0.90, 0.90, 0.98, 0.98, 0.99, 0.99),
+  conf = c(FALSE, TRUE, FALSE, TRUE, FALSE, TRUE),
+  stringsAsFactors = FALSE
+)
+
+# Methods
+method.list <- data.frame(
+  data_usage = c("ssl", "complete_case", "complete_case", "ssl", "complete_case", "complete_case", "ssl", "complete_case", "complete_case", "ssl", "complete_case", "complete_case"),
+  alpha = c(0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05),
+  estimation_method = c("IPW", "IPW", "IPW", "TMLE", "TMLE", "TMLE", "BCF", "BCF", "BCF", "IPW_BART", "IPW_BART", "IPW_BART"),
+  other_notes = c("", "", "True propensities", "", "", "True propensities", "", "", "True propensities", "", "", "True propensities"),
+  estimate_propensity = c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, FALSE),
+  stringsAsFactors = FALSE
+)
+
+# Parallelization control frame
+par.list <- merge(DGP.list, method.list, all = TRUE)
 
 # Create outputs file to store results
-# output = matrix(rep(-Inf, n_sim*n_dgps*n_columns*n_methods),
-#                 ncol = n_columns)
+n_methods = nrow(method.list)
+n_sim = 1
+n_dgps = nrow(DGP.list)
+n_df = n_sim*n_dgps*n_methods
 output_df <- data.frame(sim_num=rep(NA, n_df), 
                         estimator=rep("", n_df), 
                         method=rep("", n_df), 
@@ -45,159 +69,65 @@ output_df <- data.frame(sim_num=rep(NA, n_df),
                         cover=rep(NA, n_df), 
                         stringsAsFactors=FALSE)
 
+# Register parallel backend
+numCores <- detectCores()
+registerDoParallel(numCores)
+
+# Run simulations, with the DGPs run in parallel
 for (i in 1:n_sim){
   t = proc.time()[3]
   
-  ##########################################################
-  # First DGP
-  dgp_num = 1; startrow = 1 + (i-1)*n_dgps*n_methods; endrow = startrow + n_methods - 1
-  sample = 5000; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "90"; conf = "unconf"
-  subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  file_name = paste0("df", i, ".csv")
-  data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  df <- read.csv(data_file)
+  # Rows to save to `output_df`
+  startrow = 1 + (i-1)*n_dgps*n_methods
+  endrow = startrow + n_dgps*n_methods - 1
   
-  # Run all estimates on the DGP loaded into memory
-  output_df[startrow:endrow, ] <- simulation_estimates(
-    i, df, sample, lin, hom, missing_type, missing_pct, conf
-  )
-  
-  ##########################################################
-  # Second DGP
-  dgp_num = 2; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 5000; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "90"; conf = "conf"
-  subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  file_name = paste0("df", i, ".csv")
-  data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  df <- read.csv(data_file)
-  
-  # Run all estimates on the DGP loaded into memory
-  output_df[startrow:endrow, ] <- simulation_estimates(
-    i, df, sample, lin, hom, missing_type, missing_pct, conf
-  )
-  
-  # ##########################################################
-  # # Third DGP
-  # dgp_num = 3; startrow = 1 + endrow; endrow = endrow + n_methods
-  # sample = 1000; lin = "lin"; hom = "hom"
-  # missing_type = "MCAR"; missing_pct = "90"; conf = "unconf"
-  # subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  # file_name = paste0("df", i, ".csv")
-  # data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  # df <- read.csv(data_file)
-  # 
-  # # Run all estimates on the DGP loaded into memory
-  # output_df[startrow:endrow, ] <- simulation_estimates(
-  #   i, df, sample, lin, hom, missing_type, missing_pct, conf
-  # )
-  # 
-  # ##########################################################
-  # # Fourth DGP
-  # dgp_num = 4; startrow = 1 + endrow; endrow = endrow + n_methods
-  # sample = 1000; lin = "lin"; hom = "hom"
-  # missing_type = "MCAR"; missing_pct = "90"; conf = "conf"
-  # subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  # file_name = paste0("df", i, ".csv")
-  # data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  # df <- read.csv(data_file)
-  # 
-  # # Run all estimates on the DGP loaded into memory
-  # output_df[startrow:endrow, ] <- simulation_estimates(
-  #   i, df, sample, lin, hom, missing_type, missing_pct, conf
-  # )
-  # 
-  # ##########################################################
-  # # Fifth DGP
-  # dgp_num = 5; startrow = 1 + endrow; endrow = endrow + n_methods
-  # sample = 500; lin = "lin"; hom = "hom"
-  # missing_type = "MCAR"; missing_pct = "90"; conf = "unconf"
-  # subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  # file_name = paste0("df", i, ".csv")
-  # data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  # df <- read.csv(data_file)
-  # 
-  # # Run all estimates on the DGP loaded into memory
-  # output_df[startrow:endrow, ] <- simulation_estimates(
-  #   i, df, sample, lin, hom, missing_type, missing_pct, conf
-  # )
-  # 
-  # ##########################################################
-  # # Sixth DGP
-  # dgp_num = 6; startrow = 1 + endrow; endrow = endrow + n_methods
-  # sample = 500; lin = "lin"; hom = "hom"
-  # missing_type = "MCAR"; missing_pct = "90"; conf = "conf"
-  # subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  # file_name = paste0("df", i, ".csv")
-  # data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  # df <- read.csv(data_file)
-  # 
-  # # Run all estimates on the DGP loaded into memory
-  # output_df[startrow:endrow, ] <- simulation_estimates(
-  #   i, df, sample, lin, hom, missing_type, missing_pct, conf
-  # )
-  
-  ##########################################################
-  # Third DGP
-  dgp_num = 3; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 5000; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "98"; conf = "unconf"
-  subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  file_name = paste0("df", i, ".csv")
-  data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  df <- read.csv(data_file)
-  
-  # Run all estimates on the DGP loaded into memory
-  output_df[startrow:endrow, ] <- simulation_estimates(
-    i, df, sample, lin, hom, missing_type, missing_pct, conf
-  )
-  
-  ##########################################################
-  # Fourth DGP
-  dgp_num = 4; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 5000; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "98"; conf = "conf"
-  subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  file_name = paste0("df", i, ".csv")
-  data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  df <- read.csv(data_file)
-  
-  # Run all estimates on the DGP loaded into memory
-  output_df[startrow:endrow, ] <- simulation_estimates(
-    i, df, sample, lin, hom, missing_type, missing_pct, conf
-  )
-  
-  ##########################################################
-  # Fifth DGP
-  dgp_num = 5; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 5000; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "99"; conf = "unconf"
-  subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  file_name = paste0("df", i, ".csv")
-  data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  df <- read.csv(data_file)
-  
-  # Run all estimates on the DGP loaded into memory
-  output_df[startrow:endrow, ] <- simulation_estimates(
-    i, df, sample, lin, hom, missing_type, missing_pct, conf
-  )
-  
-  ##########################################################
-  # Sixth DGP
-  dgp_num = 6; startrow = 1 + endrow; endrow = endrow + n_methods
-  sample = 5000; lin = "lin"; hom = "hom"
-  missing_type = "MCAR"; missing_pct = "99"; conf = "conf"
-  subfolder_name = paste(lin, hom, sample, missing_type, missing_pct, conf, sep="_")
-  file_name = paste0("df", i, ".csv")
-  data_file <- file.path(project_dir, "data", "simulations", subfolder_name, file_name)
-  df <- read.csv(data_file)
-  
-  # Run all estimates on the DGP loaded into memory
-  output_df[startrow:endrow, ] <- simulation_estimates(
-    i, df, sample, lin, hom, missing_type, missing_pct, conf
-  )
+  # Run each of the simulated DGPs in parallel
+  system.time(sim_iter_result <- foreach (dgp = 1:n_dgps, .combine=rbind) %dopar% {
+    # Extract simulation directions
+    n <- DGP.list[dgp, 'sample']
+    linear <- DGP.list[dgp, 'lin']
+    homogeneous <- DGP.list[dgp, 'hom']
+    missing_mechanism <- DGP.list[dgp, 'missing_type']
+    missing_pct <- DGP.list[dgp, 'missing_pct']
+    confounded <- DGP.list[dgp, 'conf']
+    
+    # Set seed for each repetition of simulation
+    random_seed_incr <- as.integer(paste0(dgp, paste0(rep("0", 4-length(paste0(dgp,i))), collapse=""), i))
+    set.seed(random_seed_incr)
+    
+    # Generate BCF data
+    dummy_data <- bcf_simulations(n = n, linear = linear, 
+                                  homogeneous = homogeneous,
+                                  missing_mechanism = missing_mechanism, 
+                                  missing_pct = missing_pct, 
+                                  confounded = confounded)
+    causal_data = data.frame(cbind(Y = dummy_data$Y, 
+                                   Z = dummy_data$Z, 
+                                   dummy_data$X, 
+                                   M = dummy_data$M, 
+                                   tau = dummy_data$tau, 
+                                   pi_x = dummy_data$pi_x))
+    
+    # Convert simulation instructions into formatted
+    # directions for estimation and compilation of results
+    lin = ifelse(linear, "lin", "nonlin")
+    hom = ifelse(homogeneous, "hom", "het")
+    missing = paste(floor(missing_pct*100))
+    conf = ifelse(confounded, "conf", "unconf")
 
+    # Run each of the `n_methods` estimators on `causal_data`
+    # simulated dataset
+    simulation_estimates(
+      i, causal_data, n, lin, hom, missing_mechanism, missing, conf
+    )
+  })
+  
+  # Save each simulation iteration to `output_df`
+  output_df[startrow:endrow, ] <- sim_iter_result
+  
+  # Write inidividual simulation results for intermediate access
+  save_simulation_output(sim_iter_result, paste0("intermediate_sim_", i, "_"), datestamp_input = datestamp, snapshot = TRUE)
+  
   t = proc.time()[3] - t
   cat("==================================================\n", file = output_file)
   cat(paste("Run time:", t, "\n"), file = output_file)
@@ -208,12 +138,8 @@ close(output_file)
 ##########################################################
 # Save simulation output
 
-# Create new "snapshots" folder, if doesn't exist
-snapshots_subfolder = file.path(project_dir, "outputs", "snapshots", datestamp)
-ifelse(!dir.exists(snapshots_subfolder), dir.create(snapshots_subfolder), FALSE)
-
 # Write overall simulation table for later access
-save_simulation_output(output_df, "sim_", datestamp_input = datestamp, snapshot = TRUE)
+save_simulation_output(output_df, "simulations_", datestamp_input = datestamp, snapshot = TRUE)
 
 # Collapse results into table of averages
 mean_simulations <- summarize_simulation_results(output_df)

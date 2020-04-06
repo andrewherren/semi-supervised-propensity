@@ -9,6 +9,7 @@
 *.DS_store
 *.txt
 outputs/
+*.dta
 
 # Pycharm stuff
 *.idea/

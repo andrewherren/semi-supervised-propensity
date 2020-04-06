@@ -89,7 +89,7 @@ prepare_per_estimator_table <- function(sim_table_df, estimator){
       (sim_table_df[, 'Treatment Effect Type'] == "Homogeneous") & 
       (sim_table_df[, 'Unlabeled Mechanism'] == "MCAR") & 
       (sim_table_df[, 'Method'] == "CC") & 
-      (sim_table_df[, '% Unlabeled'] == "90") & 
+      (sim_table_df[, 'N'] == "5,000") & 
       (sim_table_df[, 'Propensities'] == "Estimated"), 
     c("Approach", "N", "# labeled", "ATE", "RMSE", "Bias", "Coverage")]
   xtable_df_2 <- sim_table_df[
@@ -99,7 +99,7 @@ prepare_per_estimator_table <- function(sim_table_df, estimator){
       (sim_table_df[, 'Treatment Effect Type'] == "Homogeneous") & 
       (sim_table_df[, 'Unlabeled Mechanism'] == "MCAR") & 
       (sim_table_df[, 'Method'] == "SSL") & 
-      (sim_table_df[, '% Unlabeled'] == "90") & 
+      (sim_table_df[, 'N'] == "5,000") & 
       (sim_table_df[, 'Propensities'] == "Estimated"), 
     c("Approach", "N", "# labeled", "ATE", "RMSE", "Bias", "Coverage")]
   xtable_df_3 <- sim_table_df[
@@ -192,7 +192,7 @@ prepare_all_estimator_table <- function(sim_table_df, approach){
       (sim_table_df[, 'Treatment Effect Type'] == "Homogeneous") & 
       (sim_table_df[, 'Unlabeled Mechanism'] == "MCAR") & 
       (sim_table_df[, 'Approach'] == approach) & 
-      (sim_table_df[, '% Unlabeled'] == "90"), 
+      (sim_table_df[, 'N'] == "5,000"), 
     c("Estimator", "N", "# labeled", "ATE", "RMSE", "Bias", "Coverage")]
   xtable_df_2 <- sim_table_df[
     (sim_table_df$Estimator == "IPW_BART") & 
@@ -201,7 +201,7 @@ prepare_all_estimator_table <- function(sim_table_df, approach){
       (sim_table_df[, 'Treatment Effect Type'] == "Homogeneous") & 
       (sim_table_df[, 'Unlabeled Mechanism'] == "MCAR") & 
       (sim_table_df[, 'Approach'] == approach) & 
-      (sim_table_df[, '% Unlabeled'] == "90"), 
+      (sim_table_df[, 'N'] == "5,000"), 
     c("Estimator", "N", "# labeled", "ATE", "RMSE", "Bias", "Coverage")]
   xtable_df_3 <- sim_table_df[
     (sim_table_df$Estimator == "TMLE") & 
@@ -210,7 +210,7 @@ prepare_all_estimator_table <- function(sim_table_df, approach){
       (sim_table_df[, 'Treatment Effect Type'] == "Homogeneous") & 
       (sim_table_df[, 'Unlabeled Mechanism'] == "MCAR") & 
       (sim_table_df[, 'Approach'] == approach) & 
-      (sim_table_df[, '% Unlabeled'] == "90"), 
+      (sim_table_df[, 'N'] == "5,000"), 
     c("Estimator", "N", "# labeled", "ATE", "RMSE", "Bias", "Coverage")]
   xtable_df_4 <- sim_table_df[
     (sim_table_df$Estimator == "BCF") & 
@@ -219,7 +219,7 @@ prepare_all_estimator_table <- function(sim_table_df, approach){
       (sim_table_df[, 'Treatment Effect Type'] == "Homogeneous") & 
       (sim_table_df[, 'Unlabeled Mechanism'] == "MCAR") & 
       (sim_table_df[, 'Approach'] == approach) & 
-      (sim_table_df[, '% Unlabeled'] == "90"), 
+      (sim_table_df[, 'N'] == "5,000"), 
     c("Estimator", "N", "# labeled", "ATE", "RMSE", "Bias", "Coverage")]
   xtable_df <- rbind(xtable_df_1, xtable_df_2, 
                      xtable_df_3, xtable_df_4)
